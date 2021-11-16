@@ -6,7 +6,7 @@ jobs:
     strategy:
       matrix:
         compiler_ver: [
-          7, 8, 9, 10
+          8, 9, 10, 11
         ]
 
         build_type: [ Release, Debug ]
