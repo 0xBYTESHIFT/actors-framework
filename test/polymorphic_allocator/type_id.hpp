@@ -50,7 +50,7 @@ inline type_id_t const& make_argument_id() {
 #define COMPARE_TYPEID(LHS, RHS) compare_type_id_verbose(#LHS, LHS, #RHS, RHS)
 
 inline bool compare_type_id_verbose(const char* LHSString, type_id_t const* LHS,
-                                 const char* RHSString, type_id_t const* RHS) {
+                                    const char* RHSString, type_id_t const* RHS) {
     if (*LHS == *RHS)
         return true;
     std::printf("type_id_t's not equal:\n");

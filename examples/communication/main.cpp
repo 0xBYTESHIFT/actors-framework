@@ -4,25 +4,25 @@
 #include <unordered_set>
 #include <vector>
 
-#include <actor-zeta/core.hpp>
-#include <actor-zeta/link.hpp>
+#include <actors-framework/core.hpp>
+#include <actors-framework/link.hpp>
 
-class dummy_executor final : public actor_zeta::abstract_executor {
+class dummy_executor final : public actors_framework::abstract_executor {
 public:
     dummy_executor()
         : abstract_executor(1, 10000) {}
 
-    void execute(actor_zeta::executable* ptr) override {
+    void execute(actors_framework::executable* ptr) override {
         ptr->run(nullptr, max_throughput());
     }
     void start() override {}
     void stop() override {}
 };
 
-class storage_t final : public actor_zeta::basic_async_actor {
+class storage_t final : public actors_framework::basic_async_actor {
 public:
-    explicit storage_t(actor_zeta::supervisor_abstract* ptr)
-        : actor_zeta::basic_async_actor(ptr, "storage") {
+    explicit storage_t(actors_framework::supervisor_abstract* ptr)
+        : actors_framework::basic_async_actor(ptr, "storage") {
         add_handler(
             "update",
             []() -> void {});
@@ -40,23 +40,23 @@ public:
     ~storage_t() override = default;
 };
 
-class network_t final : public actor_zeta::basic_async_actor {
+class network_t final : public actors_framework::basic_async_actor {
 public:
     ~network_t() override = default;
 
-    explicit network_t(actor_zeta::supervisor_abstract* ptr)
-        : actor_zeta::basic_async_actor(ptr, "network") {}
+    explicit network_t(actors_framework::supervisor_abstract* ptr)
+        : actors_framework::basic_async_actor(ptr, "network") {}
 };
 
-class supervisor_lite final : public actor_zeta::supervisor_abstract {
+class supervisor_lite final : public actors_framework::supervisor_abstract {
 public:
     explicit supervisor_lite(dummy_executor* ptr)
         : supervisor_abstract("network")
         , e_(ptr)
         , cursor(0)
         , system_{"sync_contacts", "add_link", "remove_link"} {
-        add_handler("create_network",&supervisor_lite::create_network);
-        add_handler("create_storage",&supervisor_lite::create_storage);
+        add_handler("create_network", &supervisor_lite::create_network);
+        add_handler("create_storage", &supervisor_lite::create_storage);
     }
 
     void create_storage() {
@@ -69,19 +69,17 @@ public:
 
     ~supervisor_lite() override = default;
 
-    auto executor_impl() noexcept -> actor_zeta::abstract_executor* final {
+    auto executor_impl() noexcept -> actors_framework::abstract_executor* final {
         return e_;
     }
 
-    auto add_actor_impl(actor_zeta::actor) -> void override {
-
+    auto add_actor_impl(actors_framework::actor) -> void override {
     }
 
-    auto add_supervisor_impl(actor_zeta::supervisor) -> void override {
-
+    auto add_supervisor_impl(actors_framework::supervisor) -> void override {
     }
 
-    void enqueue_base(actor_zeta::message_ptr msg, actor_zeta::execution_device*) final {
+    void enqueue_base(actors_framework::message_ptr msg, actors_framework::execution_device*) final {
         auto msg_ = std::move(msg);
         auto it = system_.find(msg_->command());
         if (it != system_.end()) {
@@ -92,12 +90,12 @@ public:
     }
 
 private:
-    auto local(actor_zeta::message_ptr msg) -> void {
+    auto local(actors_framework::message_ptr msg) -> void {
         set_current_message(std::move(msg));
         execute();
     }
 
-    auto redirect_robin(actor_zeta::message_ptr msg) -> void {
+    auto redirect_robin(actors_framework::message_ptr msg) -> void {
         if (!actors_.empty()) {
             actors_[cursor]->enqueue(std::move(msg));
             ++cursor;
@@ -107,19 +105,19 @@ private:
         }
     }
 
-    actor_zeta::abstract_executor* e_;
-    std::vector<actor_zeta::actor> actors_;
+    actors_framework::abstract_executor* e_;
+    std::vector<actors_framework::actor> actors_;
     std::size_t cursor;
-    std::unordered_set<actor_zeta::detail::string_view> system_;
+    std::unordered_set<actors_framework::detail::string_view> system_;
 };
 
 int main() {
-    actor_zeta::supervisor supervisor_tmp(new supervisor_lite(new dummy_executor));
-    actor_zeta::send(supervisor_tmp,actor_zeta::address_t::empty_address(),"create_storage");
-    actor_zeta::send(supervisor_tmp,actor_zeta::address_t::empty_address(),"create_network");
-    actor_zeta::supervisor supervisor1(new supervisor_lite(new dummy_executor));
-    actor_zeta::link(supervisor_tmp, supervisor1);
-    actor_zeta::send(supervisor1,actor_zeta::address_t::empty_address(),"create_storage");
-    actor_zeta::send(supervisor1,actor_zeta::address_t::empty_address(),"create_network");
+    actors_framework::supervisor supervisor_tmp(new supervisor_lite(new dummy_executor));
+    actors_framework::send(supervisor_tmp, actors_framework::address_t::empty_address(), "create_storage");
+    actors_framework::send(supervisor_tmp, actors_framework::address_t::empty_address(), "create_network");
+    actors_framework::supervisor supervisor1(new supervisor_lite(new dummy_executor));
+    actors_framework::link(supervisor_tmp, supervisor1);
+    actors_framework::send(supervisor1, actors_framework::address_t::empty_address(), "create_storage");
+    actors_framework::send(supervisor1, actors_framework::address_t::empty_address(), "create_network");
     return 0;
 }

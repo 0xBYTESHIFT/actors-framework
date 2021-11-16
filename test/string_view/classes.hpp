@@ -1,6 +1,6 @@
 #pragma once
 
-#include <actor-zeta/detail/string_view.hpp>
+#include <actors-framework/detail/string_view.hpp>
 #include <string>
 
-using namespace actor_zeta::detail;
+using namespace actors_framework::detail;

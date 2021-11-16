@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.0)
 
-PROJECT(actor-zeta CXX)
+PROJECT(actors-framework CXX)
 
 set(CMAKE_CXX_STANDARD 11 CACHE STRING "The C++ standard whose features are requested.")
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -79,44 +79,44 @@ include_directories(SYSTEM .)
 include_directories(SYSTEM header)
 
 set(HEADER_FILES
-        header/actor-zeta/base/actor_abstract.hpp
-        header/actor-zeta/base/actor.hpp
-        header/actor-zeta/base/address.hpp
-        header/actor-zeta/base/cooperative_actor.hpp
-        header/actor-zeta/base/basic_actor.hpp
-        header/actor-zeta/base/communication_module.hpp
-        header/actor-zeta/base/handler.hpp
-        header/actor-zeta/base/supervisor.hpp
-        header/actor-zeta/base/supervisor_abstract.hpp
+        header/actors-framework/base/actor_abstract.hpp
+        header/actors-framework/base/actor.hpp
+        header/actors-framework/base/address.hpp
+        header/actors-framework/base/cooperative_actor.hpp
+        header/actors-framework/base/basic_actor.hpp
+        header/actors-framework/base/communication_module.hpp
+        header/actors-framework/base/handler.hpp
+        header/actors-framework/base/supervisor.hpp
+        header/actors-framework/base/supervisor_abstract.hpp
 
-        header/actor-zeta/detail/pmr/container.hpp
-        header/actor-zeta/detail/pmr/memory_resource.hpp
-        header/actor-zeta/detail/aligned_allocate.hpp
-        header/actor-zeta/detail/any.hpp
-        header/actor-zeta/detail/callable_trait.hpp
-        header/actor-zeta/detail/intrusive_ptr.hpp
-        header/actor-zeta/detail/ref_counted.hpp
-        header/actor-zeta/detail/string_view.hpp
-        header/actor-zeta/detail/type_list.hpp
-        header/actor-zeta/detail/type_traits.hpp
+        header/actors-framework/detail/pmr/container.hpp
+        header/actors-framework/detail/pmr/memory_resource.hpp
+        header/actors-framework/detail/aligned_allocate.hpp
+        header/actors-framework/detail/any.hpp
+        header/actors-framework/detail/callable_trait.hpp
+        header/actors-framework/detail/intrusive_ptr.hpp
+        header/actors-framework/detail/ref_counted.hpp
+        header/actors-framework/detail/string_view.hpp
+        header/actors-framework/detail/type_list.hpp
+        header/actors-framework/detail/type_traits.hpp
 
-        header/actor-zeta/executor/policy/profiled.hpp
-        header/actor-zeta/executor/policy/unprofiled.hpp
-        header/actor-zeta/executor/policy/work_sharing.hpp
-        header/actor-zeta/executor/abstract_executor.hpp
-        header/actor-zeta/executor/executor.hpp
-        header/actor-zeta/executor/executable.hpp
-        header/actor-zeta/executor/profiled_executor.hpp
-        header/actor-zeta/executor/execution_device.hpp
-        header/actor-zeta/executor/worker.hpp
+        header/actors-framework/executor/policy/profiled.hpp
+        header/actors-framework/executor/policy/unprofiled.hpp
+        header/actors-framework/executor/policy/work_sharing.hpp
+        header/actors-framework/executor/abstract_executor.hpp
+        header/actors-framework/executor/executor.hpp
+        header/actors-framework/executor/executable.hpp
+        header/actors-framework/executor/profiled_executor.hpp
+        header/actors-framework/executor/execution_device.hpp
+        header/actors-framework/executor/worker.hpp
 
-        header/actor-zeta/base/message.hpp
+        header/actors-framework/base/message.hpp
 
-        header/actor-zeta/forwards.hpp
-        header/actor-zeta/link.hpp
-        header/actor-zeta/send.hpp
-        header/actor-zeta/core.hpp
-        header/actor-zeta/src.hpp
+        header/actors-framework/forwards.hpp
+        header/actors-framework/link.hpp
+        header/actors-framework/send.hpp
+        header/actors-framework/core.hpp
+        header/actors-framework/src.hpp
 )
 
 set(SOURCE_FILES
@@ -146,7 +146,7 @@ target_link_libraries(
 target_include_directories(
         ${PROJECT_NAME}
         PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/header/actor-zeta
+        ${CMAKE_CURRENT_SOURCE_DIR}/header/actors-framework
         ${CMAKE_CURRENT_SOURCE_DIR}/header
 )
 

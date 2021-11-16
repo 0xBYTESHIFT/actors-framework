@@ -5,37 +5,37 @@
 #include <map>
 #include <vector>
 
-#include <actor-zeta/core.hpp>
+#include <actors-framework/core.hpp>
 #include <testsuite/network/fake_multiplexer.hpp>
 
-using actor_zeta::address_t;
-using actor_zeta::basic_async_actor;
-using actor_zeta::message_ptr;
-using actor_zeta::supervisor;
+using actors_framework::address_t;
+using actors_framework::basic_async_actor;
+using actors_framework::message_ptr;
+using actors_framework::supervisor;
 
-using actor_zeta::abstract_executor;
-using actor_zeta::executor_t;
-using actor_zeta::work_sharing;
+using actors_framework::abstract_executor;
+using actors_framework::executor_t;
+using actors_framework::work_sharing;
 
-using actor_zeta::network::buffer;
-using actor_zeta::network::fake_multiplexer;
-using actor_zeta::network::query_raw_t;
+using actors_framework::network::buffer;
+using actors_framework::network::fake_multiplexer;
+using actors_framework::network::query_raw_t;
 
 struct query_t final {
-    actor_zeta::network::connection_identifying id;
+    actors_framework::network::connection_identifying id;
     buffer commands;
     std::vector<buffer> parameter;
 };
 
 struct response_t final {
-    actor_zeta::network::connection_identifying id;
+    actors_framework::network::connection_identifying id;
     buffer r_;
 };
 
-class supervisor_network final : public actor_zeta::supervisor_abstract {
+class supervisor_network final : public actors_framework::supervisor_abstract {
 public:
     supervisor_network(fake_multiplexer& multiplexer, abstract_executor* ptr)
-        : actor_zeta::supervisor_abstract("network")
+        : actors_framework::supervisor_abstract("network")
         , multiplexer_(multiplexer)
         , e_(ptr) {
         add_handler(
@@ -68,7 +68,7 @@ public:
                 parsed_raw_request.erase(parsed_raw_request.begin());
                 query_.parameter = std::move(parsed_raw_request);
                 query_.id = query_raw.id;
-                actor_zeta::send(
+                actors_framework::send(
                     address_book("storage"),
                     address_t(address()),
                     std::string(query_.commands),
@@ -96,21 +96,21 @@ public:
         e_->stop();
     }
 
-    auto executor_impl() noexcept -> actor_zeta::abstract_executor* override {
+    auto executor_impl() noexcept -> actors_framework::abstract_executor* override {
         return e_;
     }
 
-    auto add_actor_impl(actor_zeta::actor) -> void override {}
-    auto add_supervisor_impl(actor_zeta::supervisor) -> void override {}
+    auto add_actor_impl(actors_framework::actor) -> void override {}
+    auto add_supervisor_impl(actors_framework::supervisor) -> void override {}
     /*
-    auto join(actor_zeta::actor t) -> actor_zeta::actor_address final {
+    auto join(actors_framework::actor t) -> actors_framework::actor_address final {
         auto tmp = std::move(t);
         auto address = tmp->address();
         actors_.push_back(std::move(tmp));
         return address;
     }
 */
-    void enqueue_base(message_ptr msg, actor_zeta::execution_device*) final {
+    void enqueue_base(message_ptr msg, actors_framework::execution_device*) final {
         set_current_message(std::move(msg));
         execute();
     }
@@ -118,7 +118,7 @@ public:
 private:
     fake_multiplexer& multiplexer_;
     abstract_executor* e_;
-    std::vector<actor_zeta::actor> actors_;
+    std::vector<actors_framework::actor> actors_;
 };
 
 /// protocol :
@@ -129,7 +129,7 @@ constexpr static const char* write = "write";
 
 class storage_t final : public basic_async_actor {
 public:
-    explicit storage_t(actor_zeta::supervisor_abstract* ptr)
+    explicit storage_t(actors_framework::supervisor_abstract* ptr)
         : basic_async_actor(ptr, "storage") {
         auto* self = this;
         add_handler(
@@ -143,7 +143,7 @@ public:
                 response_t response;
                 response.r_ = std::to_string(static_cast<int>(status));
                 response.id = tmp.id;
-                actor_zeta::send(
+                actors_framework::send(
                     current_message()->sender(),
                     address(),
                     write,
@@ -192,11 +192,11 @@ constexpr const std::size_t port = 5555;
 constexpr const char* host = "localhost";
 
 int main() {
-    std::unique_ptr<actor_zeta::network::fake_multiplexer> multiplexer(new actor_zeta::network::fake_multiplexer);
+    std::unique_ptr<actors_framework::network::fake_multiplexer> multiplexer(new actors_framework::network::fake_multiplexer);
 
     multiplexer->add_scenario(host, port)
 
-        .add("update.1qaz.7", actor_zeta::network::client_state::read)
+        .add("update.1qaz.7", actors_framework::network::client_state::read)
 
         .add(
             [](const std::string& buffer) -> bool {
@@ -204,16 +204,16 @@ int main() {
                           << "check write" << std::endl;
                 return "1" == buffer;
             },
-            actor_zeta::network::client_state::write,
+            actors_framework::network::client_state::write,
             0)
 
-        .add(actor_zeta::network::client_state::close);
+        .add(actors_framework::network::client_state::close);
 
     std::unique_ptr<executor_t<work_sharing>> thread_pool(new executor_t<work_sharing>(1, std::numeric_limits<std::size_t>::max()));
 
-    actor_zeta::supervisor supervisor_tmp(new supervisor_network(*multiplexer, thread_pool.get()));
+    actors_framework::supervisor supervisor_tmp(new supervisor_network(*multiplexer, thread_pool.get()));
 
-    actor_zeta::spawn_actor<storage_t>(supervisor_tmp);
+    actors_framework::spawn_actor<storage_t>(supervisor_tmp);
 
     return multiplexer->start();
 }

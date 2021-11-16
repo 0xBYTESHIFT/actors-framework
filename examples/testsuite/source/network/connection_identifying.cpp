@@ -1,6 +1,6 @@
 #include <testsuite/network/connection_identifying.hpp>
 
-namespace actor_zeta {
+namespace actors_framework {
 namespace network {
 
     connection_identifying::connection_identifying(const connect_type& tc, const std::string& ip_, const int& port_)
@@ -26,18 +26,18 @@ namespace network {
         return (type_connect_ == ci.type_connect_ && ip_ == ci.ip_ && port_ == ci.port_);
     }
 }
-} // namespace actor_zeta::network
+} // namespace actors_framework::network
 
 namespace std {
-    std::string to_string(actor_zeta::network::connect_type tc) {
+    std::string to_string(actors_framework::network::connect_type tc) {
         std::string tmp;
         switch (tc) {
-            case actor_zeta::network::connect_type::tcp: {
+            case actors_framework::network::connect_type::tcp: {
                 tmp = "tcp";
                 break;
             }
 
-            case actor_zeta::network::connect_type::udp: {
+            case actors_framework::network::connect_type::udp: {
                 tmp = "udp";
                 break;
             }
@@ -45,7 +45,7 @@ namespace std {
         return tmp;
     }
 
-    std::string to_string(actor_zeta::network::connection_identifying ci) {
+    std::string to_string(actors_framework::network::connection_identifying ci) {
         return ci.to_string();
     }
 

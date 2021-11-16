@@ -1,9 +1,9 @@
 #include <cassert>
-#include <header/actor-zeta/core.hpp>
+#include <header/actors-framework/core.hpp>
 #include <iostream>
 #include <testsuite/network/fake_multiplexer.hpp>
 
-namespace actor_zeta { namespace network {
+namespace actors_framework::network {
 
     std::size_t fake_multiplexer::start() {
         assert(!scenario.empty());
@@ -75,4 +75,4 @@ namespace actor_zeta { namespace network {
         : enabled(true) {
     }
 
-}} // namespace actor_zeta::network
+} // namespace actors_framework::network

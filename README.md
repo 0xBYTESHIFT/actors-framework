@@ -2,27 +2,12 @@
 | compiler  | Master | Develop |
 |:---:|:---:|:---:|
 | gcc 9 - 11 | |[![ubuntu](https://github.com/0xBYTESHIFT/actors-framework/actions/workflows/ubuntu_gcc.yaml/badge.svg?branch=main)](https://github.com/0xBYTESHIFT/actors-framework/actions/workflows/ubuntu_gcc.yaml) |
-|clang 7 - 10 | |[![ubuntu](https://github.com/0xBYTESHIFT/actors-framework/actions/workflows/ubuntu_clang.yaml/badge.svg?branch=main)](https://github.com/0xBYTESHIFT/actors-framework/actions/workflows/ubuntu_clang.yaml)|
+|clang 8 - 11 | |[![ubuntu](https://github.com/0xBYTESHIFT/actors-framework/actions/workflows/ubuntu_clang.yaml/badge.svg?branch=main)](https://github.com/0xBYTESHIFT/actors-framework/actions/workflows/ubuntu_clang.yaml)|
 
-actor-zeta
+actors-framework
 ========================
 
-actor-zeta is an open source C++17 virtual actor model implementation featuring lightweight & fast and more.
-
-## Release cycle information:
-### 1.0.0a6 : 
-    dynamically adding actors and supervisors 
-    adding polymorph allocator 
-    adding tests
-
-### 1.0.0a7 :
-    Getting ready for beta
-    Finishes expanding functionality
-    integrate with polymorph allocator
-
-### 1.0.0b1 :
-    benchmarks 
-    performance tuning
+actors-framework is an open source C++17 virtual actor model implementation featuring lightweight & fast concurrent message passing.
 
 ## Example
 
@@ -30,9 +15,9 @@ actor-zeta is an open source C++17 virtual actor model implementation featuring 
 
 ```C++
 
-#include <actor-zeta/core.hpp>
+#include <actors-framework/core.hpp>
 
-using actor_zeta::basic_async_actor;
+using actors_framework::basic_async_actor;
 
 class key_value_storage_t final : public basic_async_actor {
 public:
@@ -79,9 +64,9 @@ private:
 
 ```C++
 
-#include <actor-zeta/core.hpp>
+#include <actors-framework/core.hpp>
 
-using actor_zeta::basic_async_actor;
+using actors_framework::basic_async_actor;
 
 class storage_t final : public basic_async_actor {
 public:
@@ -106,28 +91,6 @@ public:
 };
 
 ```
-
-## For Users
-
-Add the corresponding remote to your conan:
-
-```bash
-    conan remote add jinncrafters https://api.bintray.com/conan/jinncrafters/conan
-```
-
-### Basic setup
-```bash
-    $ conan install actor-zeta/1.0.0a4@jinncrafters/stable
-```
-### Project setup
-
-If you handle multiple dependencies in your project is better to add a *conanfile.txt*
-
-    [requires]
-    actor-zeta/1.0.0a4@jinncrafters/stable
-
-    [generators]
-    cmake
 
 ## Dependencies
 
