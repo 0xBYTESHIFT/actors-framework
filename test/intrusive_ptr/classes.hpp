@@ -4,10 +4,10 @@
 #include <iostream>
 #include <vector>
 
-#include <actor-zeta/detail/intrusive_ptr.hpp>
-#include <actor-zeta/detail/ref_counted.hpp>
+#include <actors-framework/detail/intrusive_ptr.hpp>
+#include <actors-framework/detail/ref_counted.hpp>
 
-using namespace actor_zeta;
+using namespace actors_framework;
 
 template<class T, class... Ts>
 intrusive_ptr<T> make_counted(Ts&&... xs) {

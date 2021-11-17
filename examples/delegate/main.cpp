@@ -4,13 +4,13 @@
 #include <unordered_set>
 #include <vector>
 
-#include <actor-zeta/core.hpp>
-#include <actor-zeta/send.hpp>
+#include <actors-framework/core.hpp>
+#include <actors-framework/send.hpp>
 
-class storage_t final : public actor_zeta::basic_async_actor {
+class storage_t final : public actors_framework::basic_async_actor {
 public:
-    storage_t(actor_zeta::supervisor_abstract* ptr)
-        : actor_zeta::basic_async_actor(ptr, "storage") {
+    storage_t(actors_framework::supervisor_abstract* ptr)
+        : actors_framework::basic_async_actor(ptr, "storage") {
         add_handler(
             "update",
             &storage_t::update);
@@ -50,17 +50,17 @@ private:
     }
 };
 
-auto thread_pool_deleter = [](actor_zeta::abstract_executor* ptr) {
+auto thread_pool_deleter = [](actors_framework::abstract_executor* ptr) {
     ptr->stop();
     delete ptr;
 };
 
 /// non thread safe
-class supervisor_lite final : public actor_zeta::supervisor_abstract {
+class supervisor_lite final : public actors_framework::supervisor_abstract {
 public:
     explicit supervisor_lite()
         : supervisor_abstract("network")
-        , e_(new actor_zeta::executor_t<actor_zeta::work_sharing>(
+        , e_(new actors_framework::executor_t<actors_framework::work_sharing>(
                  1,
                  100),
              thread_pool_deleter)
@@ -80,17 +80,17 @@ public:
 
     ~supervisor_lite() override = default;
 
-    auto executor_impl() noexcept -> actor_zeta::abstract_executor* final { return e_.get(); }
+    auto executor_impl() noexcept -> actors_framework::abstract_executor* final { return e_.get(); }
 
-    auto add_actor_impl(actor_zeta::actor t) -> void final {
+    auto add_actor_impl(actors_framework::actor t) -> void final {
         actors_.push_back(std::move(t));
     }
 
-    auto add_supervisor_impl(actor_zeta::supervisor t) -> void final {
+    auto add_supervisor_impl(actors_framework::supervisor t) -> void final {
         supervisor_.emplace_back(std::move(t));
     }
 
-    auto enqueue_base(actor_zeta::message_ptr msg, actor_zeta::execution_device*) -> void final {
+    auto enqueue_base(actors_framework::message_ptr msg, actors_framework::execution_device*) -> void final {
         auto msg_ = std::move(msg);
         auto it = system_.find(msg_->command());
         if (it != system_.end()) {
@@ -101,12 +101,12 @@ public:
     }
 
 private:
-    auto local(actor_zeta::message_ptr msg) -> void {
+    auto local(actors_framework::message_ptr msg) -> void {
         set_current_message(std::move(msg));
         execute();
     }
 
-    auto redirect_robin(actor_zeta::message_ptr msg) -> void {
+    auto redirect_robin(actors_framework::message_ptr msg) -> void {
         if (!actors_.empty()) {
             actors_[cursor]->enqueue(std::move(msg));
             ++cursor;
@@ -116,20 +116,20 @@ private:
         }
     }
 
-    std::unique_ptr<actor_zeta::abstract_executor, decltype(thread_pool_deleter)> e_;
-    std::vector<actor_zeta::actor> actors_;
-    std::vector<actor_zeta::supervisor> supervisor_;
+    std::unique_ptr<actors_framework::abstract_executor, decltype(thread_pool_deleter)> e_;
+    std::vector<actors_framework::actor> actors_;
+    std::vector<actors_framework::supervisor> supervisor_;
     std::size_t cursor;
-    std::unordered_set<actor_zeta::detail::string_view> system_;
+    std::unordered_set<actors_framework::detail::string_view> system_;
 };
 
 int main() {
-    actor_zeta::supervisor dummy_supervisor(new supervisor_lite());
-    actor_zeta::send(dummy_supervisor,actor_zeta::address_t::empty_address(),"create");
-    actor_zeta::delegate_send(dummy_supervisor, "storage", "update", std::string("payload"));
-    actor_zeta::delegate_send(dummy_supervisor, "storage", "find");
-    actor_zeta::delegate_send(dummy_supervisor, "storage", "remove");
-    actor_zeta::delegate_send(dummy_supervisor, "storage", "status");
+    actors_framework::supervisor dummy_supervisor(new supervisor_lite());
+    actors_framework::send(dummy_supervisor, actors_framework::address_t::empty_address(), "create");
+    actors_framework::delegate_send(dummy_supervisor, "storage", "update", std::string("payload"));
+    actors_framework::delegate_send(dummy_supervisor, "storage", "find");
+    actors_framework::delegate_send(dummy_supervisor, "storage", "remove");
+    actors_framework::delegate_send(dummy_supervisor, "storage", "status");
 
     std::this_thread::sleep_for(std::chrono::seconds(180));
 

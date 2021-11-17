@@ -5,16 +5,16 @@
 #include <cassert>
 #include <deque>
 #include <functional>
-#include <header/actor-zeta/core.hpp>
+#include <header/actors-framework/core.hpp>
 #include <list>
 #include <queue>
 #include <thread>
 #include <unordered_map>
 #include <utility>
 
-namespace actor_zeta { namespace network {
+namespace actors_framework::network {
 
-    using actor_zeta::address_t;
+    using actors_framework::address_t;
 
     enum class client_state {
         close,
@@ -35,7 +35,7 @@ namespace actor_zeta { namespace network {
         query_raw_t(const query_raw_t&) = default;
         query_raw_t& operator=(const query_raw_t&) = default;
         ~query_raw_t() = default;
-        actor_zeta::network::connection_identifying id;
+        actors_framework::network::connection_identifying id;
         buffer raw;
     };
 
@@ -119,7 +119,7 @@ namespace actor_zeta { namespace network {
         connection() = default;
         using socket_t = Socket;
 
-        connection(socket_t&& socket, actor_zeta::address_t&& address)
+        connection(socket_t&& socket, actors_framework::address_t&& address)
             : socket_(std::forward<Socket>(socket))
             , address_(std::move(address)) {
         }
@@ -134,13 +134,13 @@ namespace actor_zeta { namespace network {
             return socket_;
         }
 
-        actor_zeta::address_t address() const {
+        actors_framework::address_t address() const {
             return address_;
         }
 
     private:
         socket_t socket_;
-        actor_zeta::address_t address_;
+        actors_framework::address_t address_;
     };
 
     class fake_multiplexer final {
@@ -153,9 +153,9 @@ namespace actor_zeta { namespace network {
 
         std::size_t start();
 
-        void new_tcp_listener(const std::string& host, uint16_t port, actor_zeta::address_t);
+        void new_tcp_listener(const std::string& host, uint16_t port, actors_framework::address_t);
 
-        void new_tcp_connection(const std::string& host, uint16_t port, actor_zeta::address_t);
+        void new_tcp_connection(const std::string& host, uint16_t port, actors_framework::address_t);
 
         void close(const connection_identifying&);
 
@@ -168,5 +168,4 @@ namespace actor_zeta { namespace network {
         std::unordered_map<connection_identifying, fake_socket> scenario;
     };
 
-}
-} // namespace actor_zeta::network
+} // namespace actors_framework::network

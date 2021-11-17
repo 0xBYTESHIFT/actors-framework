@@ -7,13 +7,14 @@ if (CLANG_TIDY)
             COMMAND ${CLANG_TIDY}
             ${ALL_SOURCE_FILES}
             --
-            -std=c++11
+            -std=c++17
             ${INCLUDE_DIRECTORIES}
     )
 endif ()
 
 find_program(CLANG_FORMAT NAMES clang-format )
 if (CLANG_FORMAT)
+    message(STATUS "clang-format found")
     add_custom_target(
             clang-format
             COMMAND ${CLANG_FORMAT}

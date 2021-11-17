@@ -3,11 +3,11 @@
 #include <cstdint>
 #include <memory>
 
-namespace actor_zeta {
+namespace actors_framework {
 namespace network {
     ///
     /// @brief
     ///
     class multiplexer;
 }
-} // namespace actor_zeta::network
+} // namespace actors_framework::network

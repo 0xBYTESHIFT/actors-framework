@@ -1,6 +1,6 @@
 #pragma once
 
-#include <actor-zeta/core.hpp>
+#include <actors-framework/core.hpp>
 
-using actor_zeta::address_t;
-using actor_zeta::message;
+using actors_framework::address_t;
+using actors_framework::message;

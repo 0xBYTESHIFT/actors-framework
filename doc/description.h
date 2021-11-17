@@ -2,7 +2,7 @@
 @mainpage API Reference Start Page 
 # Introduction
 ## What is this?
-Actor-zeta is an open source C++11 actor model implementation featuring lightweight & fast  and more.
+actors-framework is an open source C++11 actor model implementation featuring lightweight & fast  and more.
 
 The libraray uses a standard practice for its versioning: <I>major.minor.patchlevel.</I> example : <B>0.0.1</B>
 

@@ -10,13 +10,13 @@
 
 #include "controlled_allocators.hpp"
 
-#include <actor-zeta/detail/aligned_allocate.hpp>
-#include <actor-zeta/detail/pmr/memory_resource.hpp>
-#include <actor-zeta/detail/pmr/polymorphic_allocator.hpp>
-#include <actor-zeta/detail/type_traits.hpp>
+#include <actors-framework/detail/aligned_allocate.hpp>
+#include <actors-framework/detail/pmr/memory_resource.hpp>
+#include <actors-framework/detail/pmr/polymorphic_allocator.hpp>
+#include <actors-framework/detail/type_traits.hpp>
 
-using actor_zeta::detail::pmr::memory_resource;
-using actor_zeta::detail::pmr::polymorphic_allocator;
+using actors_framework::detail::pmr::memory_resource;
+using actors_framework::detail::pmr::polymorphic_allocator;
 
 template<class provider_t, int N>
 class test_resource_impl_t : public memory_resource {
@@ -131,7 +131,7 @@ struct buffer_provider_t {
     buffer_provider_t() {}
 
     void* allocate(size_t s, size_t a) {
-        void* ret = actor_zeta::detail::align(s, a, next, space);
+        void* ret = actors_framework::detail::align(s, a, next, space);
         if (ret == nullptr) {
 #ifndef TEST_HAS_NO_EXCEPTIONS
             throw std::bad_alloc();

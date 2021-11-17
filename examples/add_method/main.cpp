@@ -3,14 +3,14 @@
 #include <set>
 #include <string>
 
-#include <actor-zeta/core.hpp>
-#include <actor-zeta/send.hpp>
+#include <actors-framework/core.hpp>
+#include <actors-framework/send.hpp>
 #include <iostream>
 
-class storage_t final : public actor_zeta::basic_async_actor {
+class storage_t final : public actors_framework::basic_async_actor {
 public:
-    storage_t(actor_zeta::supervisor_abstract* ptr)
-        : actor_zeta::basic_async_actor(ptr, "storage") {
+    storage_t(actors_framework::supervisor_abstract* ptr)
+        : actors_framework::basic_async_actor(ptr, "storage") {
         add_handler(
             "update",
             []() -> void {});
@@ -23,7 +23,7 @@ public:
             "remove",
             []() -> void {});
 
-        assert(actor_zeta::detail::string_view("storage") == type());
+        assert(actors_framework::detail::string_view("storage") == type());
 
         auto tmp = message_types();
 
@@ -39,12 +39,12 @@ public:
     ~storage_t() override = default;
 };
 
-class dummy_executor final : public actor_zeta::abstract_executor {
+class dummy_executor final : public actors_framework::abstract_executor {
 public:
     dummy_executor(uint64_t threads, uint64_t throughput)
         : abstract_executor(threads, throughput) {}
 
-    void execute(actor_zeta::executable* ptr) override {
+    void execute(actors_framework::executable* ptr) override {
         ptr->run(nullptr, max_throughput());
         intrusive_ptr_release(ptr);
     }
@@ -54,7 +54,7 @@ public:
     void stop() override {}
 };
 
-class dummy_supervisor  final : public actor_zeta::supervisor_abstract {
+class dummy_supervisor final : public actors_framework::supervisor_abstract {
 public:
     dummy_supervisor()
         : supervisor_abstract("dummy_supervisor")
@@ -67,19 +67,19 @@ public:
         spawn_actor<storage_t>();
     }
 
-    auto executor_impl() noexcept -> actor_zeta::abstract_executor* final {
+    auto executor_impl() noexcept -> actors_framework::abstract_executor* final {
         return e_.get();
     }
 
-    auto add_actor_impl(actor_zeta::actor t) -> void final {
+    auto add_actor_impl(actors_framework::actor t) -> void final {
         actors_.emplace_back(std::move(t));
     }
 
-    auto add_supervisor_impl(actor_zeta::supervisor t) -> void final {
+    auto add_supervisor_impl(actors_framework::supervisor t) -> void final {
         supervisor_.emplace_back(std::move(t));
     }
 
-    auto enqueue_base(actor_zeta::message_ptr msg, actor_zeta::execution_device*) -> void final {
+    auto enqueue_base(actors_framework::message_ptr msg, actors_framework::execution_device*) -> void final {
         {
             set_current_message(std::move(msg));
             execute();
@@ -87,14 +87,14 @@ public:
     }
 
 private:
-    std::unique_ptr<actor_zeta::abstract_executor> e_;
-    std::vector<actor_zeta::actor> actors_;
-    std::vector<actor_zeta::supervisor> supervisor_;
+    std::unique_ptr<actors_framework::abstract_executor> e_;
+    std::vector<actors_framework::actor> actors_;
+    std::vector<actors_framework::supervisor> supervisor_;
 };
 
 int main() {
-    actor_zeta::supervisor supervisor(new dummy_supervisor());
-   actor_zeta::send(supervisor,actor_zeta::address_t::empty_address(),"create");
+    actors_framework::supervisor supervisor(new dummy_supervisor());
+    actors_framework::send(supervisor, actors_framework::address_t::empty_address(), "create");
 
     return 0;
 }

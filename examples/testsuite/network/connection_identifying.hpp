@@ -2,7 +2,7 @@
 
 #include <string>
 
-namespace actor_zeta { namespace network {
+namespace actors_framework::network {
     ///
     /// @enum type_connect
     /// @brief
@@ -42,17 +42,16 @@ namespace actor_zeta { namespace network {
         int port_;
     };
 
-}
-} // namespace actor_zeta::network
+} // namespace actors_framework::network
 
 namespace std {
-    std::string to_string(actor_zeta::network::connect_type);
+    std::string to_string(actors_framework::network::connect_type);
 
-    std::string to_string(actor_zeta::network::connection_identifying);
+    std::string to_string(actors_framework::network::connection_identifying);
 
     template<>
-    struct hash<actor_zeta::network::connection_identifying> {
-        inline size_t operator()(const actor_zeta::network::connection_identifying& ref) const {
+    struct hash<actors_framework::network::connection_identifying> {
+        inline size_t operator()(const actors_framework::network::connection_identifying& ref) const {
             return hash<string>{}(ref.to_string());
         }
     };

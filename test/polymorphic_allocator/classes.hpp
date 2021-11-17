@@ -2,14 +2,14 @@
 
 #include <cstddef>
 
-#include <actor-zeta/detail/pmr/default_resource.hpp>
-#include <actor-zeta/detail/pmr/memory_resource.hpp>
-#include <actor-zeta/detail/pmr/polymorphic_allocator.hpp>
-#include <actor-zeta/detail/type_traits.hpp>
+#include <actors-framework/detail/pmr/default_resource.hpp>
+#include <actors-framework/detail/pmr/memory_resource.hpp>
+#include <actors-framework/detail/pmr/polymorphic_allocator.hpp>
+#include <actors-framework/detail/type_traits.hpp>
 
 #include "test_memory_resource.hpp"
 
-namespace pmr = actor_zeta::detail::pmr;
+namespace pmr = actors_framework::detail::pmr;
 using pmr::memory_resource;
 using pmr::polymorphic_allocator;
 
