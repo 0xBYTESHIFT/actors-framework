@@ -1,7 +1,6 @@
 #pragma once
 
 #include <actors-framework/detail/intrusive_ptr.hpp>
-#include <actors-framework/detail/string_view.hpp>
 #include <actors-framework/forwards.hpp>
 
 #include <type_traits>
@@ -70,7 +69,7 @@ namespace actors_framework::base {
             return static_cast<bool>(ptr_);
         }
 
-        auto type() const -> detail::string_view;
+        auto type() const -> const std::string&;
 
         inline bool operator!() const noexcept {
             return !ptr_;

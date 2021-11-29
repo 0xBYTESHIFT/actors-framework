@@ -196,7 +196,7 @@ private:
     std::vector<actors_framework::actor> actors_;
     std::vector<actors_framework::address_t> actors_for_broadcast_;
     std::vector<actors_framework::supervisor> supervisor_;
-    std::unordered_set<actors_framework::detail::string_view> system_;
+    std::unordered_set<std::string> system_;
 };
 
 auto main() -> int {

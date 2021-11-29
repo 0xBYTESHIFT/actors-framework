@@ -6,8 +6,8 @@
 
 namespace actors_framework::base {
 
-    auto message::command() const noexcept -> detail::string_view {
-        return detail::string_view(command_.data(), command_.size());
+    auto message::command() const noexcept -> const std::string& {
+        return command_;
     }
 
     auto message::clone() const -> message* {
@@ -38,8 +38,7 @@ namespace actors_framework::base {
     message::message()
         : next(nullptr)
         , prev(nullptr)
-        , sender_(address_t::empty_address())
-    {}
+        , sender_(address_t::empty_address()) {}
 
     bool message::is_high_priority() const {
         return false;

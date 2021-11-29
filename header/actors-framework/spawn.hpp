@@ -5,10 +5,6 @@
 
 namespace actors_framework {
 
-    namespace detail {
-
-    } // namespace detail
-
     template<
         class ChildrenSupervisor,
         class... Args,

@@ -1,6 +1,5 @@
 #pragma once
 
-#include <actors-framework/detail/string_view.hpp>
 #include <actors-framework/forwards.hpp>
 
 namespace actors_framework::base {
@@ -11,17 +10,19 @@ namespace actors_framework::base {
     public:
         address_t(address_t&& other) noexcept;
         address_t(const address_t& other);
-        address_t& operator=(address_t&& other) noexcept;
-        address_t& operator=(const address_t& other);
-        ~address_t() noexcept;
         explicit address_t(actor_abstract*);
         explicit address_t(supervisor_abstract*);
+        ~address_t() noexcept;
+
+        address_t& operator=(address_t&& other) noexcept;
+        address_t& operator=(const address_t& other);
+
         static auto empty_address() -> address_t {
             static address_t tmp;
             return tmp;
         }
         auto enqueue(message_ptr) noexcept -> void;
-        auto type() const -> detail::string_view;
+        auto type() const -> const std::string&;
         operator bool() const noexcept;
         auto operator!() const noexcept -> bool;
         void swap(address_t& other);

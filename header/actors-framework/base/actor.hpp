@@ -1,7 +1,6 @@
 #pragma once
 
 #include <actors-framework/detail/intrusive_ptr.hpp>
-#include <actors-framework/detail/string_view.hpp>
 #include <actors-framework/detail/type_list.hpp>
 #include <actors-framework/forwards.hpp>
 
@@ -13,17 +12,13 @@ namespace actors_framework::base {
     class actor final {
     public:
         actor() = default;
-
         actor(const actor& a) = delete;
-
         actor(actor&& a) = default;
+        actor(std::nullptr_t);
+        ~actor();
 
         actor& operator=(const actor& a) = delete;
-
         actor& operator=(actor&& a) = default;
-
-        actor(std::nullptr_t);
-
         actor& operator=(std::nullptr_t);
 
         template<
@@ -41,41 +36,33 @@ namespace actors_framework::base {
         template<
             class T,
             class = type_traits::enable_if_t<std::is_base_of<actor_abstract, T>::value>>
-        actor& operator=(intrusive_ptr<T> ptr) {
+        auto operator=(intrusive_ptr<T> ptr) -> actor& {
             actor tmp{std::move(ptr)};
-            swap(tmp);
+            swap_(tmp);
             return *this;
         }
 
         template<
             class T,
             class = type_traits::enable_if_t<std::is_base_of<actor_abstract, T>::value>>
-        actor& operator=(T* ptr) {
+        auto operator=(T* ptr) -> actor& {
             actor tmp{ptr};
-            swap(tmp);
+            swap_(tmp);
             return *this;
         }
 
-        address_t address() const noexcept;
+        auto address() const noexcept -> address_t;
 
-        ~actor();
+        auto operator->() const noexcept -> actor_abstract*;
 
-        inline actor_abstract* operator->() const noexcept {
-            return ptr_.get();
-        }
+        explicit operator bool() const noexcept;
 
-        inline explicit operator bool() const noexcept {
-            return static_cast<bool>(ptr_);
-        }
+        auto type() const -> const std::string&;
 
-        auto type() const -> detail::string_view;
-
-        inline bool operator!() const noexcept {
-            return !ptr_;
-        }
+        auto operator!() const noexcept -> bool;
 
     private:
-        void swap(actor&) noexcept;
+        void swap_(actor&) noexcept;
 
         intrusive_ptr<actor_abstract> ptr_;
     };

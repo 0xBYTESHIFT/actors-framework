@@ -17,5 +17,5 @@ cd ${workspace}/build
 export CC=${COMPILER_C}
 export CXX=${COMPILER_CXX}
 cmake -DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD} -DALLOW_TESTS=ON ..
-cmake --build .
+cmake --build . --parallel
 

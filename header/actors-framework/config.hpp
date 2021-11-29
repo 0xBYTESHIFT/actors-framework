@@ -47,16 +47,6 @@ namespace actors_framework {
 #define HAVE_STD_ANY 0
 #endif
 
-#if CPP17_OR_GREATER && defined(__has_include)
-#if __has_include(<string_view> )
-#define HAVE_STD_STRING_VIEW 1
-#else
-#define HAVE_STD_STRING_VIEW 0
-#endif
-#else
-#define HAVE_STD_STRING_VIEW 0
-#endif
-
 #define CACHE_LINE_SIZE 64
 
 #ifndef NODISCARD

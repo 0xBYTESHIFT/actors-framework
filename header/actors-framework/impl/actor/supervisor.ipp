@@ -7,27 +7,27 @@
 
 namespace actors_framework::base {
 
+    supervisor::supervisor(std::nullptr_t)
+        : ptr_(nullptr) {}
+
     supervisor::~supervisor() {}
 
-    address_t supervisor::address() const noexcept {
+    auto supervisor::operator=(std::nullptr_t) -> supervisor& {
+        ptr_.reset();
+        return *this;
+    }
+
+    auto supervisor::address() const noexcept -> address_t {
         return address_t(ptr_.get());
     }
 
-    detail::string_view supervisor::type() const {
+    auto supervisor::type() const -> const std::string& {
         return ptr_->type();
     }
 
     void supervisor::swap(supervisor& other) noexcept {
         using std::swap;
         ptr_.swap(other.ptr_);
-    }
-
-    supervisor::supervisor(std::nullptr_t)
-        : ptr_(nullptr) {}
-
-    supervisor& supervisor::operator=(std::nullptr_t) {
-        ptr_.reset();
-        return *this;
     }
 
 } // namespace actors_framework::base

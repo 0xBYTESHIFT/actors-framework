@@ -7,14 +7,14 @@
 
 namespace actors_framework {
 
-    template<typename... Args>
+    template<class... Args>
     void send(base::supervisor& supervisor, Args... args) {
         supervisor->enqueue(
             make_message(
                 std::forward<Args>(args)...));
     }
 
-    template<typename... Args>
+    template<class... Args>
     void delegate_send(const base::supervisor& supervisor, std::string type, Args... args) {
         supervisor->enqueue(
             make_message(
@@ -26,7 +26,7 @@ namespace actors_framework {
                     std::forward<Args>(args)...))));
     }
 
-    template<typename... Args>
+    template<class... Args>
     void delegate_send(const base::supervisor& supervisor, base::address_t type, Args... args) {
         supervisor->enqueue(
             make_message(
@@ -38,7 +38,7 @@ namespace actors_framework {
                     std::forward<Args>(args)...))));
     }
 
-    template<typename... Args>
+    template<class... Args>
     void delegate_send(base::address_t& supervisor, std::string type, Args... args) {
         supervisor.enqueue(
             make_message(
@@ -50,35 +50,35 @@ namespace actors_framework {
                     std::forward<Args>(args)...))));
     }
 
-    template<typename... Args>
+    template<class... Args>
     void send(const base::supervisor& supervisor, Args... args) {
         supervisor->enqueue(
             make_message(
                 std::forward<Args>(args)...));
     }
 
-    template<typename... Args>
+    template<class... Args>
     void send(base::actor& actor, Args... args) {
         actor->enqueue(
             make_message(
                 std::forward<Args>(args)...));
     }
 
-    template<typename... Args>
+    template<class... Args>
     void send(base::actor&& actor, Args... args) {
         actor->enqueue(
             make_message(
                 std::forward<Args>(args)...));
     }
 
-    template<typename... Args>
+    template<class... Args>
     void send(base::address_t&& address, Args... args) {
         address.enqueue(
             make_message(
                 std::forward<Args>(args)...));
     }
 
-    template<typename... Args>
+    template<class... Args>
     void send(base::address_t& address, Args... args) {
         address.enqueue(
             make_message(
