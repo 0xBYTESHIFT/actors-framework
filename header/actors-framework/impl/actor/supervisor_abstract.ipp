@@ -83,11 +83,11 @@ namespace actors_framework::base {
         return executor_impl();
     }
 
-    auto supervisor_abstract::redirect_(std::string& type, message* msg) -> void {
-        message_ptr tmp(std::move(msg));
-        auto type_t = std::move(type);
-        tmp->sender() = std::move(address());
-        send(address_book(std::move(type_t)), std::move(tmp));
+    auto supervisor_abstract::redirect_(const std::string& type_, message* msg_) -> void {
+        message_ptr msg(std::move(msg_));
+        auto type = std::move(type_);
+        msg->sender() = this->address();
+        send(address_book(std::move(type)), std::move(msg));
     }
 
     auto supervisor_abstract::address() noexcept -> address_t {

@@ -17,6 +17,15 @@ namespace actors_framework::base {
         std::cerr << " WARNING " << std::endl;
     }
 
+    cooperative_actor::cooperative_actor(supervisor_abstract* supervisor, std::string type)
+        : actor_abstract(std::move(type))
+        , supervisor_m_(supervisor) {
+        flags_(static_cast<int>(state::empty));
+        mailbox_().try_unblock();
+    }
+
+    cooperative_actor::~cooperative_actor() {}
+
     auto cooperative_actor::run(executor::execution_device* e, size_t max_throughput) -> executor::executable_result {
         if (!activate_(e)) {
             return executor::executable_result::done;
@@ -110,15 +119,6 @@ namespace actors_framework::base {
         mailbox_().try_unblock();
         deref();
     }
-
-    cooperative_actor::cooperative_actor(supervisor_abstract* supervisor, std::string type)
-        : actor_abstract(std::move(type))
-        , supervisor_m_(supervisor) {
-        flags_(static_cast<int>(state::empty));
-        mailbox_().try_unblock();
-    }
-
-    cooperative_actor::~cooperative_actor() {}
 
     auto cooperative_actor::activate_(executor::execution_device* ctx) -> bool {
         //assert(ctx != nullptr);

@@ -1,7 +1,6 @@
 #pragma once
 
 #include <actors-framework/base/cooperative_actor.hpp>
-#include <actors-framework/base/metadata.hpp>
 #include <actors-framework/forwards.hpp>
 
 namespace actors_framework::executor {
@@ -9,6 +8,7 @@ namespace actors_framework::executor {
     template<class Policy>
     struct profiled final : Policy {
         using executor_type = profiled_executor<profiled<Policy>>;
+        using actor_id = size_t;
 
         static actor_id id_of(executable* job) {
             auto ptr = static_cast<base::cooperative_actor*>(job);

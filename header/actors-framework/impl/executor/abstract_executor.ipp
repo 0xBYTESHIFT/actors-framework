@@ -14,6 +14,13 @@ namespace actors_framework::executor {
         , max_throughput_(max_throughput)
         , num_workers_(num_worker_threads) {
     }
+    auto abstract_executor::max_throughput() const -> size_t {
+        return max_throughput_;
+    }
+
+    auto abstract_executor::num_workers() const -> size_t {
+        return num_workers_;
+    }
 
     void cleanup_and_release(executable* ptr) {
         class dummy_unit final : public execution_device {

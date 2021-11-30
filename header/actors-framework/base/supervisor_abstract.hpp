@@ -67,7 +67,7 @@ namespace actors_framework::base {
 
     private:
         void sync_(const base::address_t&);
-        auto redirect_(std::string& type, message* msg) -> void;
+        auto redirect_(const std::string& type, message* msg) -> void;
         void add_link_();
         void remove_link_();
 

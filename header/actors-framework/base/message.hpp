@@ -19,8 +19,8 @@ namespace actors_framework::base {
 
     class message final {
     public:
-        message* next;
-        message* prev;
+        message* next = nullptr;
+        message* prev = nullptr;
 
         message();
         message(const message&) = delete;

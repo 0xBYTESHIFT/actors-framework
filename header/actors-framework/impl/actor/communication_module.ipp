@@ -29,6 +29,11 @@ namespace actors_framework::base {
         std::cerr << "WARNING" << std::endl;
     }
 
+    communication_module::communication_module(std::string type)
+        : type_(std::move(type)) {}
+
+    communication_module::~communication_module() {}
+
     void communication_module::execute() {
         auto it = handlers_.find(current_message()->command());
         if (it != handlers_.end()) {
@@ -73,11 +78,6 @@ namespace actors_framework::base {
     auto communication_module::type() const -> const std::string& {
         return type_;
     }
-
-    communication_module::~communication_module() {}
-
-    communication_module::communication_module(std::string type)
-        : type_(std::move(type)) {}
 
     void communication_module::enqueue(message_ptr msg, executor::execution_device* e) {
         enqueue_base(std::move(msg), e);

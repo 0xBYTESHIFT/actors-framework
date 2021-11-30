@@ -47,16 +47,9 @@ namespace actors_framework::base {
         supervisor& operator=(std::nullptr_t);
         supervisor& operator=(const supervisor& a) = delete;
         supervisor& operator=(supervisor&& a) = default;
-
-        inline auto operator->() const noexcept -> supervisor_abstract* {
-            return ptr_.get();
-        }
-        inline explicit operator bool() const noexcept {
-            return static_cast<bool>(ptr_);
-        }
-        inline bool operator!() const noexcept {
-            return !ptr_;
-        }
+        auto operator->() const noexcept -> supervisor_abstract*;
+        bool operator!() const noexcept;
+        explicit operator bool() const noexcept;
 
         auto address() const noexcept -> address_t;
 

@@ -16,6 +16,15 @@ namespace actors_framework::base {
         ptr_.reset();
         return *this;
     }
+    auto supervisor::operator->() const noexcept -> supervisor_abstract* {
+        return ptr_.get();
+    }
+    bool supervisor::operator!() const noexcept {
+        return !ptr_;
+    }
+    supervisor::operator bool() const noexcept {
+        return static_cast<bool>(ptr_);
+    }
 
     auto supervisor::address() const noexcept -> address_t {
         return address_t(ptr_.get());

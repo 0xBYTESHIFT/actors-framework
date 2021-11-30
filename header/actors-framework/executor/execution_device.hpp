@@ -8,11 +8,8 @@ namespace actors_framework::executor {
     ///
     struct execution_device {
         execution_device() = default;
-
         execution_device(execution_device&&) = delete;
-
         execution_device(const execution_device&) = delete;
-
         virtual ~execution_device();
 
         virtual void execute(executable*) = 0;
