@@ -96,7 +96,6 @@ set(HEADER_FILES
         header/actors-framework/detail/callable_trait.hpp
         header/actors-framework/detail/intrusive_ptr.hpp
         header/actors-framework/detail/ref_counted.hpp
-        header/actors-framework/detail/string_view.hpp
         header/actors-framework/detail/type_list.hpp
         header/actors-framework/detail/type_traits.hpp
 

@@ -23,7 +23,7 @@ public:
             "remove",
             []() -> void {});
 
-        assert(actors_framework::detail::string_view("storage") == type());
+        assert("storage" == type());
 
         auto tmp = message_types();
 

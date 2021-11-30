@@ -3,7 +3,6 @@
 #include <cassert>
 
 #include <actors-framework/detail/any.hpp>
-#include <actors-framework/detail/string_view.hpp>
 #include <actors-framework/forwards.hpp>
 #include <string>
 
@@ -20,28 +19,32 @@ namespace actors_framework::base {
 
     class message final {
     public:
+        message* next = nullptr;
+        message* prev = nullptr;
+
         message();
         message(const message&) = delete;
-        message& operator=(const message&) = delete;
         message(message&& other) = default;
-        message& operator=(message&&) = default;
-        ~message() = default;
         message(address_t /*sender*/, std::string /*name*/);
         message(address_t /*sender*/, std::string /*name*/, detail::any /*body*/);
-        message* next;
-        message* prev;
-        auto command() const noexcept -> detail::string_view;
+        ~message() = default;
+
+        message& operator=(const message&) = delete;
+        message& operator=(message&&) = default;
+        operator bool();
+
+        auto command() const noexcept -> const std::string&;
         auto sender() & noexcept -> address_t&;
         auto sender() && noexcept -> address_t&&;
         auto sender() const& noexcept -> address_t const&;
 
-        template<typename T>
+        template<class T>
         auto body() const -> const T& {
             assert(body_.has_value());
             return detail::any_cast<const T&>(body_);
         }
 
-        template<typename T>
+        template<class T>
         auto body() -> T& {
             assert(body_.has_value());
             return detail::any_cast<T&>(body_);
@@ -49,7 +52,6 @@ namespace actors_framework::base {
 
         auto body() -> detail::any&;
         auto clone() const -> message*;
-        operator bool();
         void swap(message& other) noexcept;
         bool is_high_priority() const;
 

@@ -1,7 +1,6 @@
 #pragma once
 
 #include <actors-framework/detail/intrusive_ptr.hpp>
-#include <actors-framework/detail/string_view.hpp>
 #include <actors-framework/forwards.hpp>
 
 #include <type_traits>
@@ -11,19 +10,9 @@ namespace actors_framework::base {
     class supervisor final {
     public:
         supervisor() = default;
-
         supervisor(const supervisor& a) = delete;
-
         supervisor(supervisor&& a) = default;
-
-        supervisor& operator=(const supervisor& a) = delete;
-
-        supervisor& operator=(supervisor&& a) = default;
-
         supervisor(std::nullptr_t);
-
-        supervisor& operator=(std::nullptr_t);
-
         template<
             class T,
             class = type_traits::enable_if_t<std::is_base_of<supervisor_abstract, T>::value>>
@@ -41,7 +30,7 @@ namespace actors_framework::base {
             class = type_traits::enable_if_t<std::is_base_of<supervisor_abstract, T>::value>>
         supervisor& operator=(intrusive_ptr<T> ptr) {
             supervisor tmp{std::move(ptr)};
-            swap(tmp);
+            swap_(tmp);
             return *this;
         }
 
@@ -50,34 +39,28 @@ namespace actors_framework::base {
             class = type_traits::enable_if_t<std::is_base_of<supervisor_abstract, T>::value>>
         supervisor& operator=(T* ptr) {
             supervisor tmp{ptr};
-            swap(tmp);
+            swap_(tmp);
             return *this;
         }
-
-        address_t address() const noexcept;
-
         ~supervisor();
 
-        inline supervisor_abstract* operator->() const noexcept {
+        supervisor& operator=(std::nullptr_t);
+        supervisor& operator=(const supervisor& a) = delete;
+        supervisor& operator=(supervisor&& a) = default;
+        auto operator->() const noexcept -> supervisor_abstract*;
+        bool operator!() const noexcept;
+        explicit operator bool() const noexcept;
+
+        auto address() const noexcept -> address_t;
+
+        inline auto get() const noexcept -> supervisor_abstract* {
             return ptr_.get();
         }
 
-        inline supervisor_abstract* get() const noexcept {
-            return ptr_.get();
-        }
-
-        inline explicit operator bool() const noexcept {
-            return static_cast<bool>(ptr_);
-        }
-
-        auto type() const -> detail::string_view;
-
-        inline bool operator!() const noexcept {
-            return !ptr_;
-        }
+        auto type() const -> const std::string&;
 
     private:
-        void swap(supervisor&) noexcept;
+        void swap_(supervisor&) noexcept;
 
         intrusive_ptr<supervisor_abstract> ptr_;
     };

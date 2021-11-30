@@ -19,10 +19,10 @@ namespace actors_framework::base {
     public:
         ~helper() override = default;
 
-        template<typename F>
+        template<class F>
         helper(F&& f);
 
-        template<typename F, typename ClassPtr>
+        template<class F, class ClassPtr>
         helper(F&& f, ClassPtr* self);
 
         void invoke(communication_module& ctx) final {
@@ -33,12 +33,12 @@ namespace actors_framework::base {
         std::function<void(communication_module&)> helper_;
     };
 
-    template<typename F>
+    template<class F>
     inline auto make_handler(F&& f) -> handler* {
         return new helper(std::forward<F>(f));
     }
 
-    template<typename F, typename ClassPtr>
+    template<class F, class ClassPtr>
     inline auto make_handler(F&& f, ClassPtr* self) -> handler* {
         return new helper(std::forward<F>(f), self);
     }

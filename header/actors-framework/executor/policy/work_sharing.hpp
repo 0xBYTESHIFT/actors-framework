@@ -62,7 +62,7 @@ namespace actors_framework::executor {
         }
 
         template<class Worker>
-        executable* dequeue(Worker* self) {
+        auto dequeue(Worker* self) -> executable* {
             auto& parent_data = cast(self->parent());
             std::unique_lock<std::mutex> guard(parent_data.lock);
             parent_data.cv.wait(guard, [&] { return !parent_data.queue.empty(); });

@@ -24,13 +24,10 @@ namespace actors_framework::executor {
 
     struct executable {
         executable() = default;
-
         virtual ~executable();
 
         virtual void intrusive_ptr_add_ref_impl() = 0;
-
         virtual void intrusive_ptr_release_impl() = 0;
-
         virtual auto run(execution_device*, size_t max_throughput) -> executable_result = 0;
     };
 

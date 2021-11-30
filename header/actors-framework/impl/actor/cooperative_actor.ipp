@@ -3,11 +3,11 @@
 #include <iostream>
 
 #include <actors-framework/base/address.hpp>
+#include <actors-framework/base/cooperative_actor.hpp>
 #include <actors-framework/base/message.hpp>
+#include <actors-framework/base/supervisor_abstract.hpp>
 #include <actors-framework/executor/abstract_executor.hpp>
 #include <actors-framework/executor/execution_device.hpp>
-#include <actors-framework/base/supervisor_abstract.hpp>
-#include <actors-framework/base/cooperative_actor.hpp>
 
 namespace actors_framework::base {
 
@@ -17,8 +17,17 @@ namespace actors_framework::base {
         std::cerr << " WARNING " << std::endl;
     }
 
-    executor::executable_result cooperative_actor::run(executor::execution_device* e, size_t max_throughput) {
-        if (!activate(e)) {
+    cooperative_actor::cooperative_actor(supervisor_abstract* supervisor, std::string type)
+        : actor_abstract(std::move(type))
+        , supervisor_m_(supervisor) {
+        flags_(static_cast<int>(state::empty));
+        mailbox_().try_unblock();
+    }
+
+    cooperative_actor::~cooperative_actor() {}
+
+    auto cooperative_actor::run(executor::execution_device* e, size_t max_throughput) -> executor::executable_result {
+        if (!activate_(e)) {
             return executor::executable_result::done;
         }
 
@@ -26,38 +35,38 @@ namespace actors_framework::base {
 
         message_ptr ptr;
 
-        while (handled_msgs < max_throughput && !mailbox().cache().empty()) {
+        while (handled_msgs < max_throughput && !mailbox_().cache().empty()) {
             do {
-                ptr = next_message();
+                ptr = next_message_();
                 if (!ptr) {
-                    if (mailbox().try_block()) {
+                    if (mailbox_().try_block()) {
                         return executor::executable_result::awaiting;
                     }
                 }
             } while (!ptr);
-            consume_from_cache();
+            consume_from_cache_();
             ++handled_msgs;
         }
 
         while (handled_msgs < max_throughput) {
             do {
-                ptr = next_message();
+                ptr = next_message_();
                 if (!ptr) {
-                    if (mailbox().try_block()) {
+                    if (mailbox_().try_block()) {
                         return executor::executable_result::awaiting;
                     }
                 }
             } while (!ptr);
-            reactivate(*ptr);
+            reactivate_(*ptr);
             ++handled_msgs;
         }
 
         while (!ptr) {
-            ptr = next_message();
-            push_to_cache(std::move(ptr));
+            ptr = next_message_();
+            push_to_cache_(std::move(ptr));
         }
 
-        if (!has_next_message() && mailbox().try_block()) {
+        if (!has_next_message_() && mailbox_().try_block()) {
             return executor::executable_result::awaiting;
         }
 
@@ -66,24 +75,24 @@ namespace actors_framework::base {
 
     void cooperative_actor::enqueue_base(message_ptr msg, executor::execution_device* e) {
         assert(msg);
-        mailbox().enqueue(msg.release());
-        if (flags() == static_cast<int>(state::empty)) {
+        mailbox_().enqueue(msg.release());
+        if (flags_() == static_cast<int>(state::empty)) {
             intrusive_ptr_add_ref(this);
             if (e != nullptr) {
-                context(e);
-                context()->execute(this);
+                context_(e);
+                context_()->execute(this);
             } else {
-                supervisor()->executor()->execute(this);
+                supervisor_()->executor()->execute(this);
             }
         }
 
         /*
-            switch ( mailbox().enqueue(msg.release())) {
+            switch ( mailbox_().enqueue(msg.release())) {
                 case detail::enqueue_result::unblocked_reader: {
                     intrusive_ptr_add_ref(this);
                     if (e != nullptr) {
-                        context(e);
-                        context()->execute(this);
+                        context_(e);
+                        context_()->execute(this);
                     } else {
                         env().executor().execute(this);
                     }
@@ -100,52 +109,41 @@ namespace actors_framework::base {
     }
 
     void cooperative_actor::intrusive_ptr_add_ref_impl() {
-        flags(static_cast<int>(state::busy));
-        mailbox().try_block();
+        flags_(static_cast<int>(state::busy));
+        mailbox_().try_block();
         ref();
     }
 
     void cooperative_actor::intrusive_ptr_release_impl() {
-        flags(static_cast<int>(state::empty));
-        mailbox().try_unblock();
+        flags_(static_cast<int>(state::empty));
+        mailbox_().try_unblock();
         deref();
     }
 
-    cooperative_actor::cooperative_actor(
-        supervisor_abstract* supervisor,
-        std::string type)
-        : actor_abstract(std::move(type))
-        , supervisor_(supervisor) {
-        flags(static_cast<int>(state::empty));
-        mailbox().try_unblock();
-    }
-
-    cooperative_actor::~cooperative_actor() {}
-
-    bool cooperative_actor::activate(executor::execution_device* ctx) {
+    auto cooperative_actor::activate_(executor::execution_device* ctx) -> bool {
         //assert(ctx != nullptr);
         if (ctx) {
-            context(ctx);
+            context_(ctx);
         }
         return true;
     }
 
-    auto cooperative_actor::reactivate(message& x) -> void {
-        consume(x);
+    auto cooperative_actor::reactivate_(message& x) -> void {
+        consume_(x);
     }
 
-    message_ptr cooperative_actor::next_message() {
-        auto& cache = mailbox().cache();
+    auto cooperative_actor::next_message_() -> message_ptr {
+        auto& cache = mailbox_().cache();
         auto i = cache.begin();
         auto e = cache.separator();
         if (i == e || !i->is_high_priority()) {
             auto hp_pos = i;
-            auto tmp = mailbox().try_pop();
+            auto tmp = mailbox_().try_pop();
             while (tmp != nullptr) {
                 cache.insert(tmp->is_high_priority() ? hp_pos : e, tmp);
                 if (hp_pos == e && !tmp->is_high_priority())
                     --hp_pos;
-                tmp = mailbox().try_pop();
+                tmp = mailbox_().try_pop();
             }
         }
         message_ptr result;
@@ -155,61 +153,72 @@ namespace actors_framework::base {
         return result;
     }
 
-    bool cooperative_actor::has_next_message() {
-        auto& mbox = mailbox();
+    auto cooperative_actor::has_next_message_() -> bool {
+        auto& mbox = mailbox_();
         auto& cache = mbox.cache();
         return cache.begin() != cache.separator() || mbox.can_fetch_more();
     }
 
-    void cooperative_actor::push_to_cache(message_ptr ptr) {
+    void cooperative_actor::push_to_cache_(message_ptr ptr) {
         assert(ptr != nullptr);
         if (!ptr->is_high_priority()) {
-            mailbox().cache().insert(mailbox().cache().end(), ptr.release());
+            mailbox_().cache().insert(mailbox_().cache().end(), ptr.release());
             return;
         }
         auto high_priority = [](const message& val) {
             return val.is_high_priority();
         };
-        auto& cache = mailbox().cache();
+        auto& cache = mailbox_().cache();
         auto e = cache.end();
         cache.insert(std::partition_point(cache.continuation(), e, high_priority), ptr.release());
     }
 
-    void cooperative_actor::consume(message& x) {
-        current_message_ = &x;
+    void cooperative_actor::consume_(message& x) {
+        current_message_m_ = &x;
         execute();
     }
 
-    bool cooperative_actor::consume_from_cache() {
-        auto& cache = mailbox().cache();
+    bool cooperative_actor::consume_from_cache_() {
+        auto& cache = mailbox_().cache();
         auto i = cache.continuation();
         auto e = cache.end();
         while (i != e) {
-            consume(*i);
+            consume_(*i);
             cache.erase(i);
             return true;
         }
         return false;
     }
 
-    void cooperative_actor::cleanup() {}
+    void cooperative_actor::cleanup_() {}
 
     auto cooperative_actor::current_message_impl() -> message* {
-        return current_message_;
+        return current_message_m_;
     }
 
-    executor::execution_device* cooperative_actor::context() const {
-        return executor_;
+    auto cooperative_actor::context_() const -> executor::execution_device* {
+        return executor_m_;
     }
 
-    void cooperative_actor::context(executor::execution_device* e) {
+    void cooperative_actor::context_(executor::execution_device* e) {
         if (e != nullptr) {
-            executor_ = e;
+            executor_m_ = e;
         }
     }
 
-    auto cooperative_actor::supervisor() -> supervisor_abstract* {
-        return supervisor_;
+    auto cooperative_actor::supervisor_() -> supervisor_abstract* {
+        return supervisor_m_;
+    }
+
+    auto cooperative_actor::flags_() const -> int {
+        return flags_m_.load(std::memory_order_relaxed);
+    }
+
+    void cooperative_actor::flags_(int new_value) {
+        flags_m_.store(new_value, std::memory_order_relaxed);
+    }
+    auto cooperative_actor::mailbox_() -> mailbox_t& {
+        return mailbox_m_;
     }
 
 } // namespace actors_framework::base

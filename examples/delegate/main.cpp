@@ -120,7 +120,7 @@ private:
     std::vector<actors_framework::actor> actors_;
     std::vector<actors_framework::supervisor> supervisor_;
     std::size_t cursor;
-    std::unordered_set<actors_framework::detail::string_view> system_;
+    std::unordered_set<std::string> system_;
 };
 
 int main() {
