@@ -16,8 +16,7 @@ namespace actors_framework::base {
 
     using message_ptr = std::unique_ptr<message>;
 
-    class communication_module
-        : public ref_counted {
+    class communication_module : public ref_counted {
     public:
         using key_type = std::string;
         using handler_storage_t = std::unordered_map<key_type, std::unique_ptr<handler>>;
@@ -27,6 +26,7 @@ namespace actors_framework::base {
         ~communication_module() override;
 
         communication_module& operator=(const communication_module&) = delete;
+
         auto type() const -> const std::string&;
         auto message_types() const -> std::set<std::string>;
         auto enqueue(message_ptr) -> void;
@@ -35,6 +35,7 @@ namespace actors_framework::base {
 
     protected:
         communication_module(std::string);
+
         virtual auto current_message_impl() -> message* = 0;
         virtual void enqueue_base(message_ptr, executor::execution_device*) = 0;
 

@@ -31,6 +31,8 @@ namespace actors_framework::base {
 
         message& operator=(const message&) = delete;
         message& operator=(message&&) = default;
+        operator bool();
+
         auto command() const noexcept -> const std::string&;
         auto sender() & noexcept -> address_t&;
         auto sender() && noexcept -> address_t&&;
@@ -50,7 +52,6 @@ namespace actors_framework::base {
 
         auto body() -> detail::any&;
         auto clone() const -> message*;
-        operator bool();
         void swap(message& other) noexcept;
         bool is_high_priority() const;
 

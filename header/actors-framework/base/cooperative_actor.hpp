@@ -13,18 +13,15 @@ namespace actors_framework::base {
 
     using max_throughput_t = std::size_t;
 
-    class cooperative_actor
-        : public actor_abstract
+    class cooperative_actor : public actor_abstract
         , public executor::executable {
     public:
         using mailbox_t = detail::single_reader_queue<message>;
 
-        executor::executable_result run(executor::execution_device*, max_throughput_t) final;
-
         ~cooperative_actor() override;
 
+        auto run(executor::execution_device*, max_throughput_t) -> executor::executable_result final;
         void intrusive_ptr_add_ref_impl() override;
-
         void intrusive_ptr_release_impl() override;
 
     protected:
@@ -41,48 +38,29 @@ namespace actors_framework::base {
             busy
         };
 
-        inline int flags() const {
-            return flags_.load(std::memory_order_relaxed);
-        }
+        auto flags_() const -> int;
+        void flags_(int new_value);
 
-        inline void flags(int new_value) {
-            flags_.store(new_value, std::memory_order_relaxed);
-        }
+        void cleanup_();
+        bool consume_from_cache_();
+        void consume_(message&);
 
-        void cleanup();
+        auto mailbox_() -> mailbox_t&;
+        auto activate_(executor::execution_device* ctx) -> bool;
+        auto reactivate_(message& x) -> void;
+        auto next_message_() -> message_ptr;
+        auto has_next_message_() -> bool;
+        void push_to_cache_(message_ptr ptr);
 
-        bool consume_from_cache();
+        auto context_(executor::execution_device*) -> void;
+        auto context_() const -> executor::execution_device*;
+        auto supervisor_() -> supervisor_abstract*;
 
-        void consume(message&);
-
-        // message processing -----------------------------------------------------
-
-        inline mailbox_t& mailbox() {
-            return mailbox_;
-        }
-
-        bool activate(executor::execution_device* ctx);
-
-        auto reactivate(message& x) -> void;
-
-        message_ptr next_message();
-
-        bool has_next_message();
-
-        void push_to_cache(message_ptr ptr);
-
-        auto context(executor::execution_device*) -> void;
-
-        auto context() const -> executor::execution_device*;
-
-        auto supervisor() -> supervisor_abstract*;
-
-        // ----------------------------------------------------- message processing
-        supervisor_abstract* supervisor_;
-        executor::execution_device* executor_;
-        message* current_message_;
-        mailbox_t mailbox_;
-        std::atomic<int> flags_;
+        supervisor_abstract* supervisor_m_;
+        executor::execution_device* executor_m_;
+        message* current_message_m_;
+        mailbox_t mailbox_m_;
+        std::atomic<int> flags_m_;
     };
 
     template<class T>

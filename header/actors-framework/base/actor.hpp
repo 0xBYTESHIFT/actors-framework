@@ -20,6 +20,9 @@ namespace actors_framework::base {
         actor& operator=(const actor& a) = delete;
         actor& operator=(actor&& a) = default;
         actor& operator=(std::nullptr_t);
+        auto operator->() const noexcept -> actor_abstract*;
+        explicit operator bool() const noexcept;
+        auto operator!() const noexcept -> bool;
 
         template<
             class T,
@@ -52,14 +55,7 @@ namespace actors_framework::base {
         }
 
         auto address() const noexcept -> address_t;
-
-        auto operator->() const noexcept -> actor_abstract*;
-
-        explicit operator bool() const noexcept;
-
         auto type() const -> const std::string&;
-
-        auto operator!() const noexcept -> bool;
 
     private:
         void swap_(actor&) noexcept;

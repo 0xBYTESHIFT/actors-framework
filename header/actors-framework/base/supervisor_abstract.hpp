@@ -10,6 +10,7 @@ namespace actors_framework::base {
         supervisor_abstract(std::string);
         supervisor_abstract(supervisor_abstract*, std::string);
         ~supervisor_abstract() override;
+
         auto executor() noexcept -> executor::abstract_executor*;
         auto resource() const -> detail::pmr::memory_resource*;
         auto address() noexcept -> address_t;
@@ -17,6 +18,11 @@ namespace actors_framework::base {
         auto broadcast(const std::string&, message_ptr) -> void;
 
     protected:
+        using storage_contact_t = std::list<address_t>;
+        using contacts_t = std::unordered_map<key_type, storage_contact_t>;
+        using address_range_t = std::pair<contacts_t::const_iterator, contacts_t::const_iterator>;
+        using communication_module::add_handler;
+
         template<
             class Actor,
             class... Args,
@@ -47,11 +53,6 @@ namespace actors_framework::base {
             return address;
         }
 
-        using storage_contact_t = std::list<address_t>;
-        using contacts_t = std::unordered_map<key_type, storage_contact_t>;
-        using address_range_t = std::pair<contacts_t::const_iterator, contacts_t::const_iterator>;
-
-        using communication_module::add_handler;
         virtual auto executor_impl() noexcept -> executor::abstract_executor* = 0;
         virtual auto add_actor_impl(actor) -> void = 0;
         virtual auto add_supervisor_impl(supervisor) -> void = 0;

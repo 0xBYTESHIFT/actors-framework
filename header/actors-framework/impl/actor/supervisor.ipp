@@ -25,8 +25,7 @@ namespace actors_framework::base {
         return ptr_->type();
     }
 
-    void supervisor::swap(supervisor& other) noexcept {
-        using std::swap;
+    void supervisor::swap_(supervisor& other) noexcept {
         ptr_.swap(other.ptr_);
     }
 

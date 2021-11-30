@@ -16,6 +16,8 @@ namespace actors_framework::base {
 
         address_t& operator=(address_t&& other) noexcept;
         address_t& operator=(const address_t& other);
+        auto operator!() const noexcept -> bool;
+        operator bool() const noexcept;
 
         static auto empty_address() -> address_t {
             static address_t tmp;
@@ -23,13 +25,12 @@ namespace actors_framework::base {
         }
         auto enqueue(message_ptr) noexcept -> void;
         auto type() const -> const std::string&;
-        operator bool() const noexcept;
-        auto operator!() const noexcept -> bool;
         void swap(address_t& other);
         void* get() const;
 
     private:
         address_t() noexcept;
+
         communication_module* ptr_;
     };
 
