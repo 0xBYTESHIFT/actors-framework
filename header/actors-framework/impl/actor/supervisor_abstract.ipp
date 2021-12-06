@@ -115,15 +115,11 @@ namespace actors_framework::base {
         return std::make_pair(contacts_.cbegin(), contacts_.cend());
     }
 
-    void supervisor_abstract::add_link_() {
-        add_link_impl_(std::move(current_message()->sender()));
-    }
-
     void supervisor_abstract::remove_link_() {
         remove_link_impl_(current_message()->sender());
     }
 
-    void supervisor_abstract::add_link_impl_(address_t address) {
+    void supervisor_abstract::add_link_(address_t address) {
         if (address && this != address.get()) {
             auto name = address.type();
             auto it = contacts_.find(name);
@@ -165,10 +161,13 @@ namespace actors_framework::base {
         }
     }
 
-    auto supervisor_abstract::broadcast(const std::string& type_, message_ptr msg_) -> void {
-        auto type = std::move(type_);
+    auto supervisor_abstract::broadcast(std::string type, message_ptr msg_) -> void {
         auto msg = std::move(msg_);
         auto range = contacts_.find(type);
+        if (range == contacts_.end()) {
+            auto mes = std::string("supervisor ") + address().type() + " can't find contact '" + type + "'";
+            throw std::out_of_range(std::move(mes));
+        }
         for (auto& i : range->second) {
             i.enqueue(message_ptr(msg->clone()));
         }
@@ -176,8 +175,8 @@ namespace actors_framework::base {
 
     void supervisor_abstract::sync_(const base::address_t& address) {
         auto address_tmp(address);
-        add_link_impl_(address_t(address));
-        send(address_tmp, supervisor_abstract::address(), "add_link");
+        add_link_(address_t(address));
+        send(address_tmp, this->address(), "add_link", this->address());
         auto& sender = current_message()->sender();
         if (sender && this != sender.get()) {
             link(sender, address_tmp);

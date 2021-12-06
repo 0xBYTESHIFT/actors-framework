@@ -11,10 +11,10 @@
 namespace actors_framework::base {
 
     static void error_sync_contacts(const std::string& name, const std::string& error) {
-        std::cerr << "WARNING" << '\n';
-        std::cerr << "Actor name : " << name << '\n';
-        std::cerr << "Not initialization address type:" << error << '\n';
-        std::cerr << "WARNING" << std::endl;
+        std::string mes = std::string("ERROR") + "\n" +
+                          "Actor name:" + name + "\n" +
+                          "Not initialization address type:" + error;
+        std::cerr << mes << std::endl;
     }
 
     actor_abstract::actor_abstract(std::string type)
@@ -31,7 +31,12 @@ namespace actors_framework::base {
     }
 
     auto actor_abstract::address_book(const std::string& name) -> address_t {
-        return contacts_.at(name);
+        auto it = contacts_.find(name);
+        if (it == contacts_.end()) {
+            auto mes = std::string("actor ") + address().type() + " can't find contact '" + name + "'";
+            throw std::out_of_range(std::move(mes));
+        }
+        return it->second;
     }
 
     auto actor_abstract::all_view_address() const -> std::set<std::string> {
@@ -42,18 +47,16 @@ namespace actors_framework::base {
         return tmp;
     }
 
-    void actor_abstract::add_link_() {
-        const auto& address = current_message()->sender();
-        add_link_impl_(address);
-    }
-
     void actor_abstract::remove_link_() {
         const auto& address = current_message()->sender();
         remove_link_impl_(address);
     }
 
-    void actor_abstract::add_link_impl_(const address_t& address) {
+    void actor_abstract::add_link_(address_t address) {
         if (address && this != address.get()) {
+            auto mes = std::string("actor ") + this->type() +
+                       " linking with " + address.type();
+            std::cout << mes << std::endl;
             auto name = address.type();
             contacts_.emplace(std::move(name), std::move(address));
         } else {

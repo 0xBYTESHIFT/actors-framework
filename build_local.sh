@@ -5,6 +5,7 @@ COMPILER_CXX=$3
 COMPILER_C=$4
 CMAKE_CXX_STANDARD=$5
 workspace=$6
+BUILD_TYPE=Debug
 rm -rf ${workspace}/build
 conan profile new default --detect
 conan profile update settings.compiler=${COMPILER} default
@@ -16,6 +17,6 @@ conan install ${workspace}/build/.. -if ${workspace}/build --build=missing -s bu
 cd ${workspace}/build
 export CC=${COMPILER_C}
 export CXX=${COMPILER_CXX}
-cmake -DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD} -DALLOW_TESTS=ON ..
+cmake -DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD} -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DALLOW_EXAMPLES=ON -DALLOW_TESTS=ON ..
 cmake --build . --parallel
 

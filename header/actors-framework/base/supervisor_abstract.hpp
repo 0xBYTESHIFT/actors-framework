@@ -15,7 +15,7 @@ namespace actors_framework::base {
         auto resource() const -> detail::pmr::memory_resource*;
         auto address() noexcept -> address_t;
         auto broadcast(message_ptr) -> void;
-        auto broadcast(const std::string&, message_ptr) -> void;
+        auto broadcast(std::string, message_ptr) -> void;
 
     protected:
         using storage_contact_t = std::list<address_t>;
@@ -68,10 +68,9 @@ namespace actors_framework::base {
     private:
         void sync_(const base::address_t&);
         auto redirect_(const std::string& type, message* msg) -> void;
-        void add_link_();
         void remove_link_();
 
-        void add_link_impl_(address_t);
+        void add_link_(address_t);
         void remove_link_impl_(const address_t&);
 
         contacts_t contacts_;

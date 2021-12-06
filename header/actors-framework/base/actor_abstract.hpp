@@ -39,9 +39,8 @@ namespace actors_framework::base {
         auto all_view_address() const -> std::set<std::string>;
 
     private:
-        void add_link_();
         void remove_link_();
-        void add_link_impl_(const address_t&);
+        void add_link_(address_t);
         void remove_link_impl_(const address_t&);
 
         std::unordered_map<std::string, address_t> contacts_;
