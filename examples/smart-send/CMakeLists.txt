@@ -1,6 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
-
-project(smart-send)
+project(smart-send CXX)
 
 add_executable(${PROJECT_NAME} main.cpp)
 
