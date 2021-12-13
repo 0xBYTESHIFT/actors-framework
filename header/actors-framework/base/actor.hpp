@@ -26,19 +26,19 @@ namespace actors_framework::base {
 
         template<
             class T,
-            class = type_traits::enable_if_t<std::is_base_of<actor_abstract, T>::value>>
+            class = type_traits::enable_if_t<std::is_base_of_v<actor_abstract, T>>>
         actor(intrusive_ptr<T> ptr)
             : ptr_(std::move(ptr)) {}
 
         template<
             class T,
-            class = type_traits::enable_if_t<std::is_base_of<actor_abstract, T>::value>>
+            class = type_traits::enable_if_t<std::is_base_of_v<actor_abstract, T>>>
         actor(T* ptr)
             : ptr_(ptr) {}
 
         template<
             class T,
-            class = type_traits::enable_if_t<std::is_base_of<actor_abstract, T>::value>>
+            class = type_traits::enable_if_t<std::is_base_of_v<actor_abstract, T>>>
         auto operator=(intrusive_ptr<T> ptr) -> actor& {
             actor tmp{std::move(ptr)};
             swap_(tmp);
@@ -47,7 +47,7 @@ namespace actors_framework::base {
 
         template<
             class T,
-            class = type_traits::enable_if_t<std::is_base_of<actor_abstract, T>::value>>
+            class = type_traits::enable_if_t<std::is_base_of_v<actor_abstract, T>>>
         auto operator=(T* ptr) -> actor& {
             actor tmp{ptr};
             swap_(tmp);
@@ -63,6 +63,6 @@ namespace actors_framework::base {
         intrusive_ptr<actor_abstract> ptr_;
     };
 
-    static_assert(std::is_move_constructible<actor>::value, "");
-    static_assert(not std::is_copy_constructible<actor>::value, "");
+    static_assert(std::is_move_constructible_v<actor>, "");
+    static_assert(not std::is_copy_constructible_v<actor>, "");
 } // namespace actors_framework::base

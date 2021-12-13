@@ -1,5 +1,9 @@
 #pragma once
 
+// This file is partially copied from CAF, the C++ Actor Framework. See the file LICENSE in
+// the main distribution directory for license terms and copyright or visit
+// https://github.com/actor-framework/actor-framework/blob/master/LICENSE.
+
 #include <cstddef>
 #include <type_traits>
 
@@ -37,6 +41,9 @@ namespace actors_framework::type_traits {
         static constexpr bool value = true;
     };
 
+    template<class T>
+    static constexpr auto is_type_list_v = is_type_list<T>::value;
+
     // size_t size(type_list)
 
     /// Gets the number of template parameters of `List`.
@@ -50,6 +57,9 @@ namespace actors_framework::type_traits {
 
     template<class... Ts>
     constexpr size_t type_list_size<type_list<Ts...>>::value;
+
+    template<class... Ts>
+    static constexpr auto type_list_size_v = type_list_size<Ts...>::value;
 
     // type at(size_t)
 
@@ -122,6 +132,9 @@ namespace actors_framework::type_traits {
     template<class... Ts>
     constexpr size_t tl_size<type_list<Ts...>>::value;
 
+    template<class... Ts>
+    constexpr auto tl_size_v = tl_size<type_list<Ts...>>::value;
+
     // list slice(size_t, size_t)
 
     template<size_t LeftOffset, size_t Remaining, typename PadType, class List, class... Ts>
@@ -167,7 +180,7 @@ namespace actors_framework::type_traits {
     /// Creates a new list from range (First, Last].
     template<class List, size_t First, size_t Last>
     struct tl_slice {
-        using type = typename tl_slice_<List, tl_size<List>::value,
+        using type = typename tl_slice_<List, tl_size_v<List>,
                                         (First > Last ? Last : First), Last>::type;
     };
 

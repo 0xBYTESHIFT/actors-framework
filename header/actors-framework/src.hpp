@@ -11,6 +11,7 @@
 #include <actors-framework/impl/actor/address.ipp>
 #include <actors-framework/impl/actor/communication_module.ipp>
 #include <actors-framework/impl/actor/cooperative_actor.ipp>
+#include <actors-framework/impl/actor/cooperative_actor_simple.ipp>
 #include <actors-framework/impl/actor/supervisor.ipp>
 #include <actors-framework/impl/actor/supervisor_abstract.ipp>
 

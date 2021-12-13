@@ -7,9 +7,9 @@
 namespace actors_framework::base {
     template<class List, std::size_t I>
     using forward_arg =
-        typename std::conditional<std::is_lvalue_reference<type_traits::type_list_at_t<List, I>>::value,
-                                  typename std::add_lvalue_reference<type_traits::decay_t<type_traits::type_list_at_t<List, I>>>::type,
-                                  typename std::add_rvalue_reference<type_traits::decay_t<type_traits::type_list_at_t<List, I>>>::type>::type;
+        typename std::conditional_t<std::is_lvalue_reference_v<type_traits::type_list_at_t<List, I>>,
+                                    typename std::add_lvalue_reference_t<type_traits::decay_t<type_traits::type_list_at_t<List, I>>>,
+                                    typename std::add_rvalue_reference_t<type_traits::decay_t<type_traits::type_list_at_t<List, I>>>>;
     /// type list to  Tuple
     template<class List>
     struct type_list_to_tuple;

@@ -40,13 +40,15 @@ namespace actors_framework::base {
         virtual void enqueue_base(message_ptr, executor::execution_device*) = 0;
 
         template<class F>
-        auto add_handler(const std::string& name, F&& f) -> typename std::enable_if<!std::is_member_function_pointer<F>::value>::type {
+        auto add_handler(const std::string& name, F&& f) -> typename std::enable_if_t<!std::is_member_function_pointer_v<F>> {
             on(name, make_handler(std::forward<F>(f)));
         }
 
         template<class F>
-        auto add_handler(const std::string& name, F&& f) -> typename std::enable_if<std::is_member_function_pointer<F>::value>::type {
-            on(name, make_handler(std::forward<F>(f), static_cast<typename type_traits::get_callable_trait_t<F>::class_type*>(this)));
+        auto add_handler(const std::string& name, F&& f) -> typename std::enable_if_t<std::is_member_function_pointer_v<F>> {
+            using class_type = typename type_traits::get_callable_trait_t<F>::class_type;
+            auto class_cast = static_cast<class_type*>(this);
+            on(name, make_handler(std::forward<F>(f), class_cast));
         }
 
         void execute();

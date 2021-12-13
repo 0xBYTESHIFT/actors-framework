@@ -1,9 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
-
-set(project add_method)
-
-cmake_policy(SET CMP0048 NEW)
-PROJECT(${project} VERSION "${CMAKE_PROJECT_VERSION}" LANGUAGES CXX)
+project(add_method CXX)
 
 set(SOURCE_FILES main.cpp)
 

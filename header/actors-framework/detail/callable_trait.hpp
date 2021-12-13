@@ -16,7 +16,7 @@ namespace actors_framework::type_traits {
         using args_types = type_list<Args...>;
         using fun_sig = R(Args...);
         using fun_type = std::function<R(Args...)>;
-        static constexpr size_t number_of_arguments = type_list_size<args_types>::value;
+        static constexpr size_t number_of_arguments = type_list_size_v<args_types>;
     };
     /*
         // member noexcept const function pointer
@@ -71,11 +71,16 @@ namespace actors_framework::type_traits {
         using type = decltype(sfinae<T>(nullptr));
         static constexpr bool value = type::value;
     };
+    template<class T>
+    using has_apply_operator_t = typename has_apply_operator<T>::type;
+
+    template<class T>
+    static constexpr auto has_apply_operator_v = has_apply_operator<T>::value;
 
     // matches (IsFun || IsMemberFun)
     template<class T,
-             bool IsFun = std::is_function<T>::value || std::is_function<typename std::remove_pointer<T>::type>::value || std::is_member_function_pointer<T>::value,
-             bool HasApplyOp = has_apply_operator<T>::value>
+             bool IsFun = std::is_function_v<T> || std::is_function<typename std::remove_pointer<T>::type>::value || std::is_member_function_pointer_v<T>,
+             bool HasApplyOp = has_apply_operator_v<T>>
     struct get_callable_trait_helper {
         using type = callable_trait<T>;
         using class_type = typename type::class_type;

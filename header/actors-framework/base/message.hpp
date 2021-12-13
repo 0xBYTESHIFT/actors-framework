@@ -62,8 +62,8 @@ namespace actors_framework::base {
         priority priority_ = priority::normal;
     };
 
-    static_assert(std::is_move_constructible<message>::value, "");
-    static_assert(not std::is_copy_constructible<message>::value, "");
+    static_assert(std::is_move_constructible_v<message>, "");
+    static_assert(not std::is_copy_constructible_v<message>, "");
 
 } // namespace actors_framework::base
 

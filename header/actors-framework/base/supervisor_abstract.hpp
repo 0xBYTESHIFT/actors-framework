@@ -26,7 +26,7 @@ namespace actors_framework::base {
         template<
             class Actor,
             class... Args,
-            class = type_traits::enable_if_t<std::is_base_of<actor_abstract, Actor>::value>>
+            class = type_traits::enable_if_t<std::is_base_of_v<actor_abstract, Actor>>>
         auto spawn_actor(Args&&... args) -> address_t {
             auto allocate_byte = sizeof(Actor);
             auto allocate_byte_alignof = alignof(Actor);
@@ -41,7 +41,7 @@ namespace actors_framework::base {
         template<
             class Supervisor,
             class... Args,
-            class = type_traits::enable_if_t<std::is_base_of<supervisor_abstract, Supervisor>::value>>
+            class = type_traits::enable_if_t<std::is_base_of_v<supervisor_abstract, Supervisor>>>
         auto spawn_supervisor(Args&&... args) -> address_t {
             auto allocate_byte = sizeof(Supervisor);
             auto allocate_byte_alignof = alignof(Supervisor);

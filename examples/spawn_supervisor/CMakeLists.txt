@@ -1,6 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
-
-project(spawn_supervisor)
+project(spawn_supervisor CXX)
 
 add_executable(${PROJECT_NAME} main.cpp)
 

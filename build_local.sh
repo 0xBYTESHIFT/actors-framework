@@ -17,6 +17,12 @@ conan install ${workspace}/build/.. -if ${workspace}/build --build=missing -s bu
 cd ${workspace}/build
 export CC=${COMPILER_C}
 export CXX=${COMPILER_CXX}
-cmake -DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD} -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DALLOW_EXAMPLES=ON -DALLOW_TESTS=ON ..
+cmake -DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD} \
+    -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
+    -DALLOW_EXAMPLES=ON \
+    -DALLOW_TESTS=ON \
+    -DUSE_SIMPLE_QUEUE=OFF \
+    -DUSE_LOCKFREE_QUEUE=ON \
+    ..
 cmake --build . --parallel
 

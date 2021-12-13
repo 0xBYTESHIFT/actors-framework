@@ -11,7 +11,7 @@ TEST_CASE("memory.resource.eq") {
         {
             memory_resource const* mr1(nullptr);
             memory_resource const* mr2(nullptr);
-            REQUIRE(std::is_same<decltype(*mr1 == *mr2), bool>::value);
+            REQUIRE(std::is_same_v<decltype(*mr1 == *mr2), bool>);
             REQUIRE(noexcept(*mr1 == *mr2));
         }
         // equal
@@ -57,7 +57,7 @@ TEST_CASE("memory.resource.eq") {
         {
             memory_resource const* mr1(nullptr);
             memory_resource const* mr2(nullptr);
-            REQUIRE(std::is_same<decltype(*mr1 != *mr2), bool>::value);
+            REQUIRE(std::is_same_v<decltype(*mr1 != *mr2), bool>);
             REQUIRE(noexcept(*mr1 != *mr2));
         }
         // not equal
@@ -105,8 +105,8 @@ TEST_CASE("memory.resource.public") {
         auto& P = R.get_controller();
         memory_resource& M = R;
         {
-            REQUIRE(std::is_same<decltype(M.allocate(0, 0)), void*>::value);
-            REQUIRE(std::is_same<decltype(M.allocate(0)), void*>::value);
+            REQUIRE(std::is_same_v<decltype(M.allocate(0, 0)), void*>);
+            REQUIRE(std::is_same_v<decltype(M.allocate(0)), void*>);
         }
         {
             REQUIRE(!noexcept(M.allocate(0, 0)));
@@ -147,8 +147,8 @@ TEST_CASE("memory.resource.public") {
         auto& P = R.get_controller();
         memory_resource& M = R;
         {
-            REQUIRE(std::is_same<decltype(M.deallocate(nullptr, 0, 0)), void>::value);
-            REQUIRE(std::is_same<decltype(M.deallocate(nullptr, 0)), void>::value);
+            REQUIRE(std::is_same_v<decltype(M.deallocate(nullptr, 0, 0)), void>);
+            REQUIRE(std::is_same_v<decltype(M.deallocate(nullptr, 0)), void>);
         }
         {
             REQUIRE(!noexcept(M.deallocate(nullptr, 0, 0)));
@@ -171,9 +171,9 @@ TEST_CASE("memory.resource.public") {
     }
 
     SECTION("dtor.pass") {
-        REQUIRE(std::has_virtual_destructor<memory_resource>::value);
-        REQUIRE(std::is_nothrow_destructible<memory_resource>::value);
-        REQUIRE(std::is_abstract<memory_resource>::value);
+        REQUIRE(std::has_virtual_destructor_v<memory_resource>);
+        REQUIRE(std::is_nothrow_destructible_v<memory_resource>);
+        REQUIRE(std::is_abstract_v<memory_resource>);
         // Check that the destructor of `test_resource_t` is called when
         // it is deleted as a pointer to `memory_resource`
         {
@@ -314,15 +314,15 @@ TEST_CASE("construct_piecewise_pair.pass") {
 TEST_CASE("memory.polymorphic.allocator.ctor") {
     /*SECTION("assign.pass") { // fails on gcc-11, gcc, 11, g++-11, Debug, 17
         typedef polymorphic_allocator<void> T;
-        REQUIRE(std::is_copy_assignable<T>::value);
-        REQUIRE(std::is_move_assignable<T>::value);
+        REQUIRE(std::is_copy_assignable_v<T>);
+        REQUIRE(std::is_move_assignable_v<T>);
     }*/
 
     SECTION("copy.pass") {
         typedef polymorphic_allocator<void> A1;
         {
-            REQUIRE(std::is_copy_constructible<A1>::value);
-            REQUIRE(std::is_move_constructible<A1>::value);
+            REQUIRE(std::is_copy_constructible_v<A1>);
+            REQUIRE(std::is_move_constructible_v<A1>);
         }
         // copy
         {
@@ -341,7 +341,7 @@ TEST_CASE("memory.polymorphic.allocator.ctor") {
 
     SECTION("default.pass") {
         {
-            REQUIRE(std::is_nothrow_default_constructible<polymorphic_allocator<void>>::value);
+            REQUIRE(std::is_nothrow_default_constructible_v<polymorphic_allocator<void>>);
         }
         {
             // test that the allocator gets its resource from get_default_resource
@@ -360,8 +360,8 @@ TEST_CASE("memory.polymorphic.allocator.ctor") {
     SECTION("memory_resource_convert.pass") {
         {
             typedef polymorphic_allocator<void> A;
-            REQUIRE(std::is_convertible<decltype(nullptr), A>::value);
-            REQUIRE(std::is_convertible<memory_resource*, A>::value);
+            REQUIRE(std::is_convertible_v<decltype(nullptr), A>);
+            REQUIRE(std::is_convertible_v<memory_resource*, A>);
         }
         {
             typedef polymorphic_allocator<void> A;
@@ -375,10 +375,10 @@ TEST_CASE("memory.polymorphic.allocator.ctor") {
         typedef polymorphic_allocator<void> A1;
         typedef polymorphic_allocator<char> A2;
         { // Test that the conversion is implicit and noexcept.
-            REQUIRE(std::is_convertible<A1 const&, A2>::value);
-            REQUIRE(std::is_convertible<A2 const&, A1>::value);
-            REQUIRE(std::is_nothrow_constructible<A1, A2 const&>::value);
-            REQUIRE(std::is_nothrow_constructible<A2, A1 const&>::value);
+            REQUIRE(std::is_convertible_v<A1 const&, A2>);
+            REQUIRE(std::is_convertible_v<A2 const&, A1>);
+            REQUIRE(std::is_nothrow_constructible_v<A1, A2 const&>);
+            REQUIRE(std::is_nothrow_constructible_v<A2, A1 const&>);
         }
         // copy other type
         {
@@ -404,7 +404,7 @@ TEST_CASE("memory.polymorphic.allocator.eq") {
         {
             A1 const a1;
             A2 const a2;
-            REQUIRE(std::is_same<decltype(a1 == a2), bool>::value);
+            REQUIRE(std::is_same_v<decltype(a1 == a2), bool>);
             REQUIRE(noexcept(a1 == a2));
         }
         // equal same type (different resource)
@@ -491,7 +491,7 @@ TEST_CASE("memory.polymorphic.allocator.eq") {
         {
             A1 const a1;
             A2 const a2;
-            REQUIRE(std::is_same<decltype(a1 != a2), bool>::value);
+            REQUIRE(std::is_same_v<decltype(a1 != a2), bool>);
             REQUIRE(noexcept(a1 != a2));
         }
         // not equal same type (different resource)
@@ -566,7 +566,7 @@ TEST_CASE("memory.polymorphic.allocator.mem") {
     SECTION("allocate.pass") {
         {
             polymorphic_allocator<int> a;
-            REQUIRE(std::is_same<decltype(a.allocate(0)), int*>::value);
+            REQUIRE(std::is_same_v<decltype(a.allocate(0)), int*>);
             REQUIRE(!noexcept(a.allocate(0)));
         }
         {
@@ -598,7 +598,7 @@ TEST_CASE("memory.polymorphic.allocator.mem") {
         typedef polymorphic_allocator<double> A;
         {
             A a;
-            REQUIRE(std::is_same<decltype(a.destroy((destroyable*) nullptr)), void>::value);
+            REQUIRE(std::is_same_v<decltype(a.destroy((destroyable*) nullptr)), void>);
         }
         {
             destroyable* ptr = ::new (std::malloc(sizeof(destroyable))) destroyable();
@@ -613,7 +613,7 @@ TEST_CASE("memory.polymorphic.allocator.mem") {
         typedef polymorphic_allocator<void> A;
         {
             A const a;
-            REQUIRE(std::is_same<decltype(a.resource()), memory_resource*>::value);
+            REQUIRE(std::is_same_v<decltype(a.resource()), memory_resource*>);
         }
         {
             memory_resource* mptr = reinterpret_cast<memory_resource*>(42);
@@ -642,7 +642,7 @@ TEST_CASE("memory.polymorphic.allocator.mem") {
         typedef polymorphic_allocator<void> A;
         {
             A const a;
-            REQUIRE(std::is_same<decltype(a.select_on_container_copy_construction()), A>::value);
+            REQUIRE(std::is_same_v<decltype(a.select_on_container_copy_construction()), A>);
         }
         {
             memory_resource* mptr = reinterpret_cast<memory_resource*>(42);
@@ -715,7 +715,7 @@ TEST_CASE("polymorphic_allocator") {
         REQUIRE(d.do_allocate_return == &dummy);
         //It shall allocate 2*sizeof(int), alignment_of<int>
         REQUIRE(d.do_allocate_bytes == 2 * sizeof(int));
-        REQUIRE(d.do_allocate_alignment == std::alignment_of<int>::value);
+        REQUIRE(d.do_allocate_alignment == std::alignment_of_v<int>);
     }
 
     SECTION("deallocate") {
@@ -728,7 +728,7 @@ TEST_CASE("polymorphic_allocator") {
         //It shall deallocate 2*sizeof(int), alignment_of<int>
         REQUIRE(d.do_deallocate_p == &dummy);
         REQUIRE(d.do_deallocate_bytes == 3 * sizeof(int));
-        REQUIRE(d.do_deallocate_alignment == std::alignment_of<int>::value);
+        REQUIRE(d.do_deallocate_alignment == std::alignment_of_v<int>);
     }
 
     SECTION("construct") {

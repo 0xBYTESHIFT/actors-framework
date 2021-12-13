@@ -5,13 +5,13 @@
 
 TEST_CASE("metaprogramming") {
     SECTION("simple") {
-        REQUIRE((is_same<int, type_list_at<l1, 0>::type>::value));
-        REQUIRE((is_same<float, type_list_at<l1, 1>::type>::value));
-        REQUIRE((is_same<std::string, type_list_at<l1, 2>::type>::value));
-        REQUIRE(3u == type_list_size<l1>::value);
-        REQUIRE(type_list_size<r1>::value == type_list_size<l1>::value);
-        REQUIRE((is_same<type_list_at<l1, 0>::type, type_list_at<r1, 2>::type>::value));
-        REQUIRE((is_same<type_list_at<l1, 1>::type, type_list_at<r1, 1>::type>::value));
-        REQUIRE((is_same<type_list_at<l1, 2>::type, type_list_at<r1, 0>::type>::value));
+        REQUIRE(std::is_same_v<int, type_list_at_t<l1, 0>>);
+        REQUIRE(std::is_same_v<float, type_list_at_t<l1, 1>>);
+        REQUIRE(std::is_same_v<std::string, type_list_at_t<l1, 2>>);
+        REQUIRE(3u == type_list_size_v<l1>);
+        REQUIRE(type_list_size_v<r1> == type_list_size_v<l1>);
+        REQUIRE((std::is_same_v<type_list_at_t<l1, 0>, type_list_at_t<r1, 2>>) );
+        REQUIRE((std::is_same_v<type_list_at_t<l1, 1>, type_list_at_t<r1, 1>>) );
+        REQUIRE((std::is_same_v<type_list_at_t<l1, 2>, type_list_at_t<r1, 0>>) );
     }
 }

@@ -1,8 +1,8 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.12)
 
 PROJECT(actors-framework CXX)
 
-set(CMAKE_CXX_STANDARD 11 CACHE STRING "The C++ standard whose features are requested.")
+set(CMAKE_CXX_STANDARD 17 CACHE STRING "The C++ standard whose features are requested.")
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -13,41 +13,17 @@ message(STATUS "CMAKE_BUILD_TYPE = ${CMAKE_BUILD_TYPE}")
 option(ALLOW_EXAMPLES "ALLOW EXAMPLES" OFF)
 option(ALLOW_TESTS "ALLOW TESTS" OFF)
 option(RTTI_DISABLE "RTTI DISABLE" ON)
-option(EXCEPTIONS_DISABLE "EXCEPTIONS DISABLE" ON)
+option(USE_LOCKFREE_QUEUE "USE_LOCKFREE_QUEUE" OFF)
+option(USE_SIMPLE_QUEUE "USE_SIMPLE_QUEUE" OFF)
 
 message(STATUS "ALLOW_EXAMPLES = ${ALLOW_EXAMPLES}")
 message(STATUS "ALLOW_TESTS = ${ALLOW_TESTS}")
 message(STATUS "RTTI_DISABLE = ${RTTI_DISABLE}")
-message(STATUS "EXCEPTIONS_DISABLE = ${EXCEPTIONS_DISABLE}")
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-
-    if (EXCEPTIONS_DISABLE)
-        message("Disable C++ exceptions.")
-        string(REGEX REPLACE "/EH[a-z]+" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc")
-    endif ()
-
-    if (RTTI_DISABLE)
-        message("Disable RTTI.")
-        string(REGEX REPLACE "/GR" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /GR-")
-    endif ()
-
-else (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-
-    if (EXCEPTIONS_DISABLE)
-        message("Disable C++ exceptions.")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-exceptions")
-    endif ()
-
-    if (RTTI_DISABLE)
-        message("Disable RTTI.")
-        string(REGEX REPLACE "-frtti" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti")
-    endif ()
-
-endif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+if (RTTI_DISABLE)
+    message("Disable RTTI.")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti")
+endif ()
 
 
 if ((CMAKE_CXX_COMPILER_ID MATCHES "GNU") OR (CMAKE_CXX_COMPILER_ID MATCHES "Clang"))
@@ -69,8 +45,6 @@ if ((CMAKE_CXX_COMPILER_ID MATCHES "GNU") OR (CMAKE_CXX_COMPILER_ID MATCHES "Cla
             -Wsign-conversion
             -Wsign-promo
     )
-elseif (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
-    add_compile_options(/W4 /WX)
 endif ()
 
 include(cmake/clang_tools.cmake)
@@ -141,6 +115,17 @@ target_link_libraries(
         PUBLIC
         ${CMAKE_THREAD_LIBS_INIT}
 )
+
+if(USE_LOCKFREE_QUEUE)
+    message(STATUS "using CAF lockfree queue")
+    target_compile_definitions(${PROJECT_NAME} PRIVATE USE_LOCKFREE_QUEUE)
+elseif(USE_SIMPLE_QUEUE)
+    message(STATUS "using simple queue")
+    target_compile_definitions(${PROJECT_NAME} PRIVATE USE_SIMPLE_QUEUE)
+else()
+    message(STATUS "using simple queue by default")
+    target_compile_definitions(${PROJECT_NAME} PRIVATE USE_SIMPLE_QUEUE)
+endif()
 
 target_include_directories(
         ${PROJECT_NAME}
