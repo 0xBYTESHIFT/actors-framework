@@ -32,12 +32,12 @@ namespace actors_framework::executor {
     };
 
     template<class T>
-    auto intrusive_ptr_add_ref(T* ptr) -> typename std::enable_if<std::is_same<T*, executable*>::value>::type {
+    auto intrusive_ptr_add_ref(T* ptr) -> typename std::enable_if_t<std::is_same_v<T*, executable*>> {
         ptr->intrusive_ptr_add_ref_impl();
     }
 
     template<class T>
-    auto intrusive_ptr_release(T* ptr) -> typename std::enable_if<std::is_same<T*, executable*>::value>::type {
+    auto intrusive_ptr_release(T* ptr) -> typename std::enable_if_t<std::is_same_v<T*, executable*>> {
         ptr->intrusive_ptr_release_impl();
     }
 
