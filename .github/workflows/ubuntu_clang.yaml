@@ -43,7 +43,7 @@ jobs:
         env:
           CXX: clang++-${{ matrix.compiler_ver}}
           CC: clang-${{ matrix.compiler_ver}}
-        run: cmake -B ${{github.workspace}}/build -GNinja -DCMAKE_BUILD_TYPE=${{ matrix.build_type}} -DCMAKE_CXX_STANDARD=${{ matrix.standard}} -DALLOW_EXAMPLES=ON -DALLOW_TESTS=ON ${{queue}}
+        run: cmake -B ${{github.workspace}}/build -GNinja -DCMAKE_BUILD_TYPE=${{ matrix.build_type}} -DCMAKE_CXX_STANDARD=${{ matrix.standard}} -DALLOW_EXAMPLES=ON -DALLOW_TESTS=ON ${{matrix.queue}}
 
       - name: Build
         run: cmake --build ${{github.workspace}}/build --config ${{ matrix.build_type}}
