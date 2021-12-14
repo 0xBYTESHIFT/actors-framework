@@ -10,7 +10,7 @@
 
 namespace actors_framework::base {
 
-    using queue_t = moodycamel::ConcurrentQueue<std::unique_ptr<message>>;
+    using queue_t = detail::single_reader_queue<message>;
 
     template<>
     class cooperative_actor<queue_t> : public actor_abstract
