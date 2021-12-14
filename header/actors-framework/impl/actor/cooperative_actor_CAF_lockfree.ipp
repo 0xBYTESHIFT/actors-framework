@@ -3,7 +3,7 @@
 #include <iostream>
 
 #include <actors-framework/base/address.hpp>
-#include <actors-framework/base/cooperative_actor.hpp>
+#include <actors-framework/base/cooperative_actor_CAF_lockfree.hpp>
 #include <actors-framework/base/message.hpp>
 #include <actors-framework/base/supervisor_abstract.hpp>
 #include <actors-framework/executor/abstract_executor.hpp>

@@ -1,24 +1,23 @@
 #pragma once
 
 #include <actors-framework/base/actor_abstract.hpp>
+#include <actors-framework/base/cooperative_actor.hpp>
 #include <actors-framework/base/message.hpp>
 #include <actors-framework/detail/simple_queue.hpp>
 #include <actors-framework/detail/single_reader_queue.hpp>
 #include <actors-framework/executor/executable.hpp>
 #include <actors-framework/forwards.hpp>
+#include <concurrentqueue.h> //moodycamel
 
 namespace actors_framework::base {
-    ///
-    /// @brief Specialization of actor with scheduling functionality
-    ///
 
-    using max_throughput_t = std::size_t;
+    using queue_t = moodycamel::ConcurrentQueue<std::unique_ptr<message>>;
 
-    template<class Queue>
-    class cooperative_actor : public actor_abstract
+    template<>
+    class cooperative_actor<queue_t> : public actor_abstract
         , public executor::executable {
     public:
-        using mailbox_t = Queue;
+        using mailbox_t = queue_t;
 
         ~cooperative_actor() override;
 
@@ -53,5 +52,17 @@ namespace actors_framework::base {
         message* current_message_m_;
         mailbox_t mailbox_m_;
     };
+
+    using cooperative_actor_moodycamel_lockfree = cooperative_actor<queue_t>;
+
+    template<class T>
+    auto intrusive_ptr_add_ref(T* ptr) -> typename std::enable_if_t<std::is_same_v<T*, cooperative_actor_moodycamel_lockfree*>> {
+        ptr->intrusive_ptr_add_ref_impl();
+    }
+
+    template<class T>
+    auto intrusive_ptr_release(T* ptr) -> typename std::enable_if_t<std::is_same_v<T*, cooperative_actor_moodycamel_lockfree*>> {
+        ptr->intrusive_ptr_release_impl();
+    }
 
 } // namespace actors_framework::base

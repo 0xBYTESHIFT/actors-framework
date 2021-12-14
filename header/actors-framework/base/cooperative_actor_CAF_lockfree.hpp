@@ -1,6 +1,7 @@
 #pragma once
 
 #include <actors-framework/base/actor_abstract.hpp>
+#include <actors-framework/base/cooperative_actor.hpp>
 #include <actors-framework/base/message.hpp>
 #include <actors-framework/detail/simple_queue.hpp>
 #include <actors-framework/detail/single_reader_queue.hpp>
@@ -8,17 +9,14 @@
 #include <actors-framework/forwards.hpp>
 
 namespace actors_framework::base {
-    ///
-    /// @brief Specialization of actor with scheduling functionality
-    ///
 
-    using max_throughput_t = std::size_t;
+    using queue_t = moodycamel::ConcurrentQueue<std::unique_ptr<message>>;
 
-    template<class Queue>
-    class cooperative_actor : public actor_abstract
+    template<>
+    class cooperative_actor<queue_t> : public actor_abstract
         , public executor::executable {
     public:
-        using mailbox_t = Queue;
+        using mailbox_t = queue_t;
 
         ~cooperative_actor() override;
 
@@ -35,7 +33,16 @@ namespace actors_framework::base {
         auto current_message_impl() -> message* override;
 
     private:
+        enum class state : int {
+            empty = 0x01,
+            busy
+        };
+
+        auto flags_() const -> int;
+        void flags_(int new_value);
+
         void cleanup_();
+        bool consume_from_cache_();
         void consume_(message&);
 
         auto mailbox_() -> mailbox_t&;
@@ -43,6 +50,7 @@ namespace actors_framework::base {
         auto reactivate_(message& x) -> void;
         auto next_message_() -> message_ptr;
         auto has_next_message_() -> bool;
+        void push_to_cache_(message_ptr ptr);
 
         auto context_(executor::execution_device*) -> void;
         auto context_() const -> executor::execution_device*;
@@ -52,6 +60,19 @@ namespace actors_framework::base {
         executor::execution_device* executor_m_;
         message* current_message_m_;
         mailbox_t mailbox_m_;
+        std::atomic<int> flags_m_;
     };
 
-} // namespace actors_framework::base
+    using cooperative_actor_CAF_lockfree = cooperative_actor<queue_t>;
+
+    template<class T>
+    auto intrusive_ptr_add_ref(T* ptr) -> typename std::enable_if_t<std::is_same_v<T*, cooperative_actor_CAF_lockfree*>> {
+        ptr->intrusive_ptr_add_ref_impl();
+    }
+
+    template<class T>
+    auto intrusive_ptr_release(T* ptr) -> typename std::enable_if_t<std::is_same_v<T*, cooperative_actor_CAF_lockfree*>> {
+        ptr->intrusive_ptr_release_impl();
+    }
+
+}; // namespace actors_framework::base

@@ -13,8 +13,9 @@ message(STATUS "CMAKE_BUILD_TYPE = ${CMAKE_BUILD_TYPE}")
 option(ALLOW_EXAMPLES "ALLOW EXAMPLES" OFF)
 option(ALLOW_TESTS "ALLOW TESTS" OFF)
 option(RTTI_DISABLE "RTTI DISABLE" ON)
-option(USE_LOCKFREE_QUEUE "USE_LOCKFREE_QUEUE" OFF)
+option(USE_CAF_LOCKFREE_QUEUE "USE_CAF_LOCKFREE_QUEUE" OFF)
 option(USE_SIMPLE_QUEUE "USE_SIMPLE_QUEUE" OFF)
+option(USE_MOODYCAMEL_LOCKFREE_QUEUE "USE_MOODYCAMEL_LOCKFREE_QUEUE" ON)
 
 message(STATUS "ALLOW_EXAMPLES = ${ALLOW_EXAMPLES}")
 message(STATUS "ALLOW_TESTS = ${ALLOW_TESTS}")
@@ -48,6 +49,17 @@ if ((CMAKE_CXX_COMPILER_ID MATCHES "GNU") OR (CMAKE_CXX_COMPILER_ID MATCHES "Cla
 endif ()
 
 include(cmake/clang_tools.cmake)
+include(cmake/CPM.cmake)
+include(${CPM_DOWNLOAD_LOCATION})
+
+if(USE_MOODYCAMEL_LOCKFREE_QUEUE)
+    CPMAddPackage(
+      NAME          moodycamel_lfqueue
+      VERSION       1.0.3
+      GIT_REPOSITORY https://github.com/cameron314/concurrentqueue
+    )
+    include_directories(${moodycamel_lfqueue_SOURCE_DIR})
+endif()
 
 include_directories(SYSTEM .)
 include_directories(SYSTEM header)
@@ -110,22 +122,27 @@ add_library(
         ${HEADER_FILES}
 )
 
-target_link_libraries(
-        ${PROJECT_NAME}
-        PUBLIC
-        ${CMAKE_THREAD_LIBS_INIT}
-)
-
-if(USE_LOCKFREE_QUEUE)
+set(LIBS_LIST ${CMAKE_THREAD_LIBS_INIT})
+if(USE_CAF_LOCKFREE_QUEUE)
     message(STATUS "using CAF lockfree queue")
-    target_compile_definitions(${PROJECT_NAME} PRIVATE USE_LOCKFREE_QUEUE)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE USE_CAF_LOCKFREE_QUEUE)
 elseif(USE_SIMPLE_QUEUE)
     message(STATUS "using simple queue")
     target_compile_definitions(${PROJECT_NAME} PRIVATE USE_SIMPLE_QUEUE)
+elseif(USE_MOODYCAMEL_LOCKFREE_QUEUE)
+    message(STATUS "using MOODYCAMEL lockfree queue")
+    target_compile_definitions(${PROJECT_NAME} PRIVATE USE_MOODYCAMEL_LOCKFREE_QUEUE)
 else()
     message(STATUS "using simple queue by default")
     target_compile_definitions(${PROJECT_NAME} PRIVATE USE_SIMPLE_QUEUE)
 endif()
+
+target_link_libraries(
+        ${PROJECT_NAME}
+        PUBLIC
+        ${LIBS_LIST}
+)
+
 
 target_include_directories(
         ${PROJECT_NAME}

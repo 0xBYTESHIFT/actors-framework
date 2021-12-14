@@ -9,6 +9,12 @@ jobs:
         compiler_ver: [9,10,11]
         standard: [17]
 
+        queue: [
+          -DUSE_CAF_LOCKFREE_QUEUE=ON,
+          -DUSE_MOODYCAMEL_LOCKFREE_QUEUE=ON,
+          -DUSE_SIMPLE_QUEUE=ON 
+        ]
+
     steps:
       - uses: actions/checkout@v2
 
@@ -35,7 +41,7 @@ jobs:
           CC: gcc-${{ matrix.compiler_ver}}
           CXX: g++-${{ matrix.compiler_ver}}
           BUILD_TYPE: ${{ matrix.profiles }}
-        run: cmake -B ${{github.workspace}}/build -GNinja -DCMAKE_BUILD_TYPE=${{ matrix.profiles }} -DCMAKE_CXX_STANDARD=${{ matrix.standard}} -DALLOW_EXAMPLES=ON -DALLOW_TESTS=ON
+        run: cmake -B ${{github.workspace}}/build -GNinja -DCMAKE_BUILD_TYPE=${{ matrix.profiles }} -DCMAKE_CXX_STANDARD=${{ matrix.standard}} -DALLOW_EXAMPLES=ON -DALLOW_TESTS=ON ${{queue}}
 
       - name: Build
         run: cmake --build ${{github.workspace}}/build --config ${{ matrix.profiles }}
