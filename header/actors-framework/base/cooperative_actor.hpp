@@ -2,8 +2,6 @@
 
 #include <actors-framework/base/actor_abstract.hpp>
 #include <actors-framework/base/message.hpp>
-#include <actors-framework/detail/simple_queue.hpp>
-#include <actors-framework/detail/single_reader_queue.hpp>
 #include <actors-framework/executor/executable.hpp>
 #include <actors-framework/forwards.hpp>
 

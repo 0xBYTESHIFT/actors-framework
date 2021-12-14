@@ -15,7 +15,7 @@ option(ALLOW_TESTS "ALLOW TESTS" OFF)
 option(RTTI_DISABLE "RTTI DISABLE" ON)
 option(USE_CAF_LOCKFREE_QUEUE "USE_CAF_LOCKFREE_QUEUE" OFF)
 option(USE_SIMPLE_QUEUE "USE_SIMPLE_QUEUE" OFF)
-option(USE_MOODYCAMEL_LOCKFREE_QUEUE "USE_MOODYCAMEL_LOCKFREE_QUEUE" ON)
+option(USE_MOODYCAMEL_LOCKFREE_QUEUE "USE_MOODYCAMEL_LOCKFREE_QUEUE" OFF)
 
 message(STATUS "ALLOW_EXAMPLES = ${ALLOW_EXAMPLES}")
 message(STATUS "ALLOW_TESTS = ${ALLOW_TESTS}")
@@ -116,6 +116,21 @@ endif (CCACHE_FOUND)
 
 find_package(Threads)
 
+if(USE_CAF_LOCKFREE_QUEUE)
+    message(STATUS "using CAF lockfree queue")
+    add_compile_definitions(USE_CAF_LOCKFREE_QUEUE=1)
+elseif(USE_SIMPLE_QUEUE)
+    message(STATUS "using simple queue")
+    add_compile_definitions(USE_SIMPLE_QUEUE=1)
+elseif(USE_MOODYCAMEL_LOCKFREE_QUEUE)
+    message(STATUS "using MOODYCAMEL lockfree queue")
+    add_compile_definitions(USE_MOODYCAMEL_LOCKFREE_QUEUE=1)
+else()
+    message(STATUS "using simple queue by default")
+    add_compile_definitions(USE_SIMPLE_QUEUE=1)
+endif()
+
+
 add_library(
         ${PROJECT_NAME}
         ${SOURCE_FILES}
@@ -123,19 +138,6 @@ add_library(
 )
 
 set(LIBS_LIST ${CMAKE_THREAD_LIBS_INIT})
-if(USE_CAF_LOCKFREE_QUEUE)
-    message(STATUS "using CAF lockfree queue")
-    target_compile_definitions(${PROJECT_NAME} PRIVATE USE_CAF_LOCKFREE_QUEUE)
-elseif(USE_SIMPLE_QUEUE)
-    message(STATUS "using simple queue")
-    target_compile_definitions(${PROJECT_NAME} PRIVATE USE_SIMPLE_QUEUE)
-elseif(USE_MOODYCAMEL_LOCKFREE_QUEUE)
-    message(STATUS "using MOODYCAMEL lockfree queue")
-    target_compile_definitions(${PROJECT_NAME} PRIVATE USE_MOODYCAMEL_LOCKFREE_QUEUE)
-else()
-    message(STATUS "using simple queue by default")
-    target_compile_definitions(${PROJECT_NAME} PRIVATE USE_SIMPLE_QUEUE)
-endif()
 
 target_link_libraries(
         ${PROJECT_NAME}

@@ -4,7 +4,6 @@
 #include <actors-framework/base/cooperative_actor.hpp>
 #include <actors-framework/base/message.hpp>
 #include <actors-framework/detail/simple_queue.hpp>
-#include <actors-framework/detail/single_reader_queue.hpp>
 #include <actors-framework/executor/executable.hpp>
 #include <actors-framework/forwards.hpp>
 
@@ -13,11 +12,13 @@ namespace actors_framework::base {
     /// @brief Specialization of actor with scheduling functionality
     ///
 
+    using queue_t = detail::simple_queue<std::unique_ptr<message>>;
+
     template<>
-    class cooperative_actor<detail::simple_queue<std::unique_ptr<message>>> : public actor_abstract
+    class cooperative_actor<queue_t> : public actor_abstract
         , public executor::executable {
     public:
-        using mailbox_t = detail::simple_queue<std::unique_ptr<message>>;
+        using mailbox_t = queue_t;
 
         ~cooperative_actor() override;
 
@@ -57,12 +58,12 @@ namespace actors_framework::base {
 
         supervisor_abstract* supervisor_m_;
         executor::execution_device* executor_m_;
-        std::unique_ptr<message> current_message_m_;
+        message_ptr current_message_m_;
         mailbox_t mailbox_m_;
         std::atomic<int> flags_m_;
     };
 
-    using cooperative_actor_simple = cooperative_actor<detail::simple_queue<std::unique_ptr<message>>>;
+    using cooperative_actor_simple = cooperative_actor<queue_t>;
 
     template<class T>
     auto intrusive_ptr_add_ref(T* ptr) -> typename std::enable_if_t<std::is_same_v<T*, cooperative_actor_simple*>> {

@@ -12,14 +12,17 @@ namespace actors_framework::base {
     using basic_async_actor =
 #ifdef USE_CAF_LOCKFREE_QUEUE
         cooperative_actor_CAF_lockfree;
+#pragma message("queue CAF selected")
 #else
 
 #ifdef USE_MOODYCAMEL_LOCKFREE_QUEUE
         cooperative_actor_moodycamel_lockfree;
+#pragma message("queue MOODYCAMEL selected")
 #else
 
 #ifdef USE_SIMPLE_QUEUE
         cooperative_actor_simple;
+#pragma message("queue SIMPLE selected")
 #else
 
         cooperative_actor_simple;

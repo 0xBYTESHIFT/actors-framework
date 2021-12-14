@@ -3,8 +3,6 @@
 #include <actors-framework/base/actor_abstract.hpp>
 #include <actors-framework/base/cooperative_actor.hpp>
 #include <actors-framework/base/message.hpp>
-#include <actors-framework/detail/simple_queue.hpp>
-#include <actors-framework/detail/single_reader_queue.hpp>
 #include <actors-framework/executor/executable.hpp>
 #include <actors-framework/forwards.hpp>
 #include <concurrentqueue.h> //moodycamel
@@ -34,12 +32,20 @@ namespace actors_framework::base {
         auto current_message_impl() -> message* override;
 
     private:
+        enum class state : int {
+            empty = 0x01,
+            busy
+        };
+
+        auto flags_() const -> int;
+        void flags_(int new_value);
+
         void cleanup_();
-        void consume_(message&);
+        void consume_(message_ptr&);
 
         auto mailbox_() -> mailbox_t&;
         auto activate_(executor::execution_device* ctx) -> bool;
-        auto reactivate_(message& x) -> void;
+        auto reactivate_(message_ptr& x) -> void;
         auto next_message_() -> message_ptr;
         auto has_next_message_() -> bool;
 
@@ -49,8 +55,9 @@ namespace actors_framework::base {
 
         supervisor_abstract* supervisor_m_;
         executor::execution_device* executor_m_;
-        message* current_message_m_;
+        message_ptr current_message_m_;
         mailbox_t mailbox_m_;
+        std::atomic<int> flags_m_;
     };
 
     using cooperative_actor_moodycamel_lockfree = cooperative_actor<queue_t>;

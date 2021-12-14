@@ -8,7 +8,7 @@
 #include <actors-framework/impl/actor/cooperative_actor_simple.ipp>
 #else
 
-#ifdef USE_SIMPLE_QUEUE
+#ifdef USE_MOODYCAMEL_LOCKFREE_QUEUE
 #include <actors-framework/impl/actor/cooperative_actor_moodycamel_lockfree.ipp>
 #else
 
