@@ -9,6 +9,12 @@ jobs:
         compiler_ver: [9,10,11]
         standard: [17]
 
+        queue: [
+          -DUSE_CAF_LOCKFREE_QUEUE=ON,
+          -DUSE_MOODYCAMEL_LOCKFREE_QUEUE=ON,
+          -DUSE_SIMPLE_QUEUE=ON 
+        ]
+
     steps:
       - uses: actions/checkout@v2
 
@@ -16,9 +22,9 @@ jobs:
         run: |
           sudo add-apt-repository ppa:ubuntu-toolchain-r/test
           sudo apt-get update
-          sudo apt-get install ninja-build gcc-${{ matrix.compiler_ver}} g++-${{ matrix.compiler_ver}} python3-pip python3 python3-dev python3-setuptools
+          sudo apt-get install -y ninja-build gcc-${{ matrix.compiler_ver}} g++-${{ matrix.compiler_ver}} python3-pip python3 python3-dev python3-setuptools
           sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-${{ matrix.compiler_ver}} 60 --slave /usr/bin/g++ g++ /usr/bin/g++-${{ matrix.compiler_ver}}
-          pip3 install --no-cache-dir conan==1.40.3
+          pip3 install --no-cache-dir conan==1.40.3 cmake
 
       - name: Install conan dependencies
         run: |
@@ -35,7 +41,7 @@ jobs:
           CC: gcc-${{ matrix.compiler_ver}}
           CXX: g++-${{ matrix.compiler_ver}}
           BUILD_TYPE: ${{ matrix.profiles }}
-        run: cmake -B ${{github.workspace}}/build -GNinja -DCMAKE_BUILD_TYPE=${{ matrix.profiles }} -DCMAKE_CXX_STANDARD=${{ matrix.standard}} -DALLOW_EXAMPLES=ON -DALLOW_TESTS=ON
+        run: cmake -B ${{github.workspace}}/build -GNinja -DCMAKE_BUILD_TYPE=${{ matrix.profiles }} -DCMAKE_CXX_STANDARD=${{ matrix.standard}} -DALLOW_EXAMPLES=ON -DALLOW_TESTS=ON ${{matrix.queue}}
 
       - name: Build
         run: cmake --build ${{github.workspace}}/build --config ${{ matrix.profiles }}

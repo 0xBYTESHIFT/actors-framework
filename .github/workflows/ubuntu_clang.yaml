@@ -13,6 +13,12 @@ jobs:
 
         standard: [17]
 
+        queue: [
+          -DUSE_CAF_LOCKFREE_QUEUE=ON,
+          -DUSE_MOODYCAMEL_LOCKFREE_QUEUE=ON,
+          -DUSE_SIMPLE_QUEUE=ON 
+        ]
+
     steps:
       - uses: actions/checkout@v2
 
@@ -20,8 +26,8 @@ jobs:
         run: |
           sudo bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"
           sudo apt-get update
-          sudo apt-get install ninja-build clang-${{ matrix.compiler_ver}} python3-pip python3 python3-dev python3-setuptools
-          pip3 install --no-cache-dir conan==1.40.3
+          sudo apt-get install -y ninja-build clang-${{ matrix.compiler_ver}} python3-pip python3 python3-dev python3-setuptools
+          pip3 install --no-cache-dir conan==1.40.3 cmake
 
       - name: Install conan dependencies
         run: |
@@ -37,7 +43,7 @@ jobs:
         env:
           CXX: clang++-${{ matrix.compiler_ver}}
           CC: clang-${{ matrix.compiler_ver}}
-        run: cmake -B ${{github.workspace}}/build -GNinja -DCMAKE_BUILD_TYPE=${{ matrix.build_type}} -DCMAKE_CXX_STANDARD=${{ matrix.standard}} -DALLOW_EXAMPLES=ON -DALLOW_TESTS=ON
+        run: cmake -B ${{github.workspace}}/build -GNinja -DCMAKE_BUILD_TYPE=${{ matrix.build_type}} -DCMAKE_CXX_STANDARD=${{ matrix.standard}} -DALLOW_EXAMPLES=ON -DALLOW_TESTS=ON ${{matrix.queue}}
 
       - name: Build
         run: cmake --build ${{github.workspace}}/build --config ${{ matrix.build_type}}

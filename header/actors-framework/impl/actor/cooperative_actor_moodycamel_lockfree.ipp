@@ -3,7 +3,7 @@
 #include <iostream>
 
 #include <actors-framework/base/address.hpp>
-#include <actors-framework/base/cooperative_actor_simple.hpp>
+#include <actors-framework/base/cooperative_actor_moodycamel_lockfree.hpp>
 #include <actors-framework/base/message.hpp>
 #include <actors-framework/base/supervisor_abstract.hpp>
 #include <actors-framework/executor/abstract_executor.hpp>
@@ -69,12 +69,15 @@ namespace actors_framework::base {
 
     auto cooperative_actor::next_message_() -> message_ptr {
         message_ptr ptr;
-        bool status = mailbox_().try_pop(ptr);
+        bool status = mailbox_().try_dequeue(ptr);
+        if (!status) {
+            ptr = nullptr;
+        }
         return ptr;
     }
 
     auto cooperative_actor::has_next_message_() -> bool {
-        return mailbox_().count() > 0;
+        return mailbox_().size_approx() > 0;
     }
 
     void cooperative_actor::consume_(message_ptr& x) {

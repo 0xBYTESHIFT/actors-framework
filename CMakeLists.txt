@@ -13,8 +13,9 @@ message(STATUS "CMAKE_BUILD_TYPE = ${CMAKE_BUILD_TYPE}")
 option(ALLOW_EXAMPLES "ALLOW EXAMPLES" OFF)
 option(ALLOW_TESTS "ALLOW TESTS" OFF)
 option(RTTI_DISABLE "RTTI DISABLE" ON)
-option(USE_LOCKFREE_QUEUE "USE_LOCKFREE_QUEUE" OFF)
+option(USE_CAF_LOCKFREE_QUEUE "USE_CAF_LOCKFREE_QUEUE" OFF)
 option(USE_SIMPLE_QUEUE "USE_SIMPLE_QUEUE" OFF)
+option(USE_MOODYCAMEL_LOCKFREE_QUEUE "USE_MOODYCAMEL_LOCKFREE_QUEUE" OFF)
 
 message(STATUS "ALLOW_EXAMPLES = ${ALLOW_EXAMPLES}")
 message(STATUS "ALLOW_TESTS = ${ALLOW_TESTS}")
@@ -48,6 +49,17 @@ if ((CMAKE_CXX_COMPILER_ID MATCHES "GNU") OR (CMAKE_CXX_COMPILER_ID MATCHES "Cla
 endif ()
 
 include(cmake/clang_tools.cmake)
+include(cmake/CPM.cmake)
+include(${CPM_DOWNLOAD_LOCATION})
+
+if(USE_MOODYCAMEL_LOCKFREE_QUEUE)
+    CPMAddPackage(
+      NAME          moodycamel_lfqueue
+      VERSION       1.0.3
+      GIT_REPOSITORY https://github.com/cameron314/concurrentqueue
+    )
+    include_directories(${moodycamel_lfqueue_SOURCE_DIR})
+endif()
 
 include_directories(SYSTEM .)
 include_directories(SYSTEM header)
@@ -104,28 +116,35 @@ endif (CCACHE_FOUND)
 
 find_package(Threads)
 
+if(USE_CAF_LOCKFREE_QUEUE)
+    message(STATUS "using CAF lockfree queue")
+    add_compile_definitions(USE_CAF_LOCKFREE_QUEUE=1)
+elseif(USE_SIMPLE_QUEUE)
+    message(STATUS "using simple queue")
+    add_compile_definitions(USE_SIMPLE_QUEUE=1)
+elseif(USE_MOODYCAMEL_LOCKFREE_QUEUE)
+    message(STATUS "using MOODYCAMEL lockfree queue")
+    add_compile_definitions(USE_MOODYCAMEL_LOCKFREE_QUEUE=1)
+else()
+    message(STATUS "using simple queue by default")
+    add_compile_definitions(USE_SIMPLE_QUEUE=1)
+endif()
+
+
 add_library(
         ${PROJECT_NAME}
         ${SOURCE_FILES}
         ${HEADER_FILES}
 )
 
+set(LIBS_LIST ${CMAKE_THREAD_LIBS_INIT})
+
 target_link_libraries(
         ${PROJECT_NAME}
         PUBLIC
-        ${CMAKE_THREAD_LIBS_INIT}
+        ${LIBS_LIST}
 )
 
-if(USE_LOCKFREE_QUEUE)
-    message(STATUS "using CAF lockfree queue")
-    target_compile_definitions(${PROJECT_NAME} PRIVATE USE_LOCKFREE_QUEUE)
-elseif(USE_SIMPLE_QUEUE)
-    message(STATUS "using simple queue")
-    target_compile_definitions(${PROJECT_NAME} PRIVATE USE_SIMPLE_QUEUE)
-else()
-    message(STATUS "using simple queue by default")
-    target_compile_definitions(${PROJECT_NAME} PRIVATE USE_SIMPLE_QUEUE)
-endif()
 
 target_include_directories(
         ${PROJECT_NAME}
