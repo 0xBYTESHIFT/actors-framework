@@ -11,9 +11,7 @@ namespace actors_framework::base {
 
     using queue_t = detail::single_reader_queue<message>;
 
-    template<>
-    class cooperative_actor<queue_t> : public actor_abstract
-        , public executor::executable {
+    class cooperative_actor : public cooperative_actor_base {
     public:
         using mailbox_t = queue_t;
 
@@ -32,45 +30,32 @@ namespace actors_framework::base {
         auto current_message_impl() -> message* override;
 
     private:
-        enum class state : int {
-            empty = 0x01,
-            busy
-        };
+        using cooperative_actor_base::flags_;
 
-        auto flags_() const -> int;
-        void flags_(int new_value);
-
-        void cleanup_();
+        void cleanup_() final;
         bool consume_from_cache_();
         void consume_(message&);
 
         auto mailbox_() -> mailbox_t&;
-        auto activate_(executor::execution_device* ctx) -> bool;
         auto reactivate_(message& x) -> void;
         auto next_message_() -> message_ptr;
-        auto has_next_message_() -> bool;
+        auto has_next_message_() -> bool final;
         void push_to_cache_(message_ptr ptr);
 
-        auto context_(executor::execution_device*) -> void;
-        auto context_() const -> executor::execution_device*;
-        auto supervisor_() -> supervisor_abstract*;
+        using cooperative_actor_base::context_;
+        using cooperative_actor_base::supervisor_;
 
-        supervisor_abstract* supervisor_m_;
-        executor::execution_device* executor_m_;
         message* current_message_m_;
         mailbox_t mailbox_m_;
-        std::atomic<int> flags_m_;
     };
 
-    using cooperative_actor_CAF_lockfree = cooperative_actor<queue_t>;
-
     template<class T>
-    auto intrusive_ptr_add_ref(T* ptr) -> typename std::enable_if_t<std::is_same_v<T*, cooperative_actor_CAF_lockfree*>> {
+    auto intrusive_ptr_add_ref(T* ptr) -> typename std::enable_if_t<std::is_same_v<cooperative_actor, T>> {
         ptr->intrusive_ptr_add_ref_impl();
     }
 
     template<class T>
-    auto intrusive_ptr_release(T* ptr) -> typename std::enable_if_t<std::is_same_v<T*, cooperative_actor_CAF_lockfree*>> {
+    auto intrusive_ptr_release(T* ptr) -> typename std::enable_if_t<std::is_same_v<cooperative_actor, T>> {
         ptr->intrusive_ptr_release_impl();
     }
 

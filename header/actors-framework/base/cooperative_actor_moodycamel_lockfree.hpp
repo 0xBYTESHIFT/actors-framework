@@ -11,9 +11,7 @@ namespace actors_framework::base {
 
     using queue_t = moodycamel::ConcurrentQueue<std::unique_ptr<message>>;
 
-    template<>
-    class cooperative_actor<queue_t> : public actor_abstract
-        , public executor::executable {
+    class cooperative_actor : public cooperative_actor_base {
     public:
         using mailbox_t = queue_t;
 
@@ -32,43 +30,25 @@ namespace actors_framework::base {
         auto current_message_impl() -> message* override;
 
     private:
-        enum class state : int {
-            empty = 0x01,
-            busy
-        };
-
-        auto flags_() const -> int;
-        void flags_(int new_value);
-
-        void cleanup_();
+        void cleanup_() final;
         void consume_(message_ptr&);
 
         auto mailbox_() -> mailbox_t&;
-        auto activate_(executor::execution_device* ctx) -> bool;
         auto reactivate_(message_ptr& x) -> void;
         auto next_message_() -> message_ptr;
-        auto has_next_message_() -> bool;
+        auto has_next_message_() -> bool final;
 
-        auto context_(executor::execution_device*) -> void;
-        auto context_() const -> executor::execution_device*;
-        auto supervisor_() -> supervisor_abstract*;
-
-        supervisor_abstract* supervisor_m_;
-        executor::execution_device* executor_m_;
         message_ptr current_message_m_;
         mailbox_t mailbox_m_;
-        std::atomic<int> flags_m_;
     };
 
-    using cooperative_actor_moodycamel_lockfree = cooperative_actor<queue_t>;
-
     template<class T>
-    auto intrusive_ptr_add_ref(T* ptr) -> typename std::enable_if_t<std::is_same_v<T*, cooperative_actor_moodycamel_lockfree*>> {
+    auto intrusive_ptr_add_ref(T* ptr) -> typename std::enable_if_t<std::is_same_v<T, cooperative_actor>> {
         ptr->intrusive_ptr_add_ref_impl();
     }
 
     template<class T>
-    auto intrusive_ptr_release(T* ptr) -> typename std::enable_if_t<std::is_same_v<T*, cooperative_actor_moodycamel_lockfree*>> {
+    auto intrusive_ptr_release(T* ptr) -> typename std::enable_if_t<std::is_same_v<T, cooperative_actor>> {
         ptr->intrusive_ptr_release_impl();
     }
 

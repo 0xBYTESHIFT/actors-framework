@@ -15,7 +15,6 @@ namespace actors_framework {
         class supervisor;
         class communication_module;
 
-        template<class Queue>
         class cooperative_actor;
     } // namespace base
 

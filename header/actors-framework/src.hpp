@@ -12,6 +12,7 @@
 #include <actors-framework/impl/actor/communication_module.ipp>
 
 #include <actors-framework/impl/actor/choose_queue.ipp>
+#include <actors-framework/impl/actor/cooperative_actor.ipp>
 
 #include <actors-framework/impl/actor/supervisor.ipp>
 #include <actors-framework/impl/actor/supervisor_abstract.ipp>
