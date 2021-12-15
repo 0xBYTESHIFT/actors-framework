@@ -58,7 +58,7 @@ namespace actors_framework::base {
         virtual auto add_supervisor_impl(supervisor) -> void = 0;
         auto set_current_message(message_ptr) -> void;
         auto current_message_impl() -> message* final;
-        auto address_book(const std::string& type) -> address_t;
+        auto address_book(std::string type) -> address_t;
         auto address_book() -> address_range_t;
         /**
         * debug method

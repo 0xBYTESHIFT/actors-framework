@@ -48,25 +48,6 @@ namespace actors_framework::base {
         }
     };
 
-    template<class F, class Args>
-    struct transformer<F, Args, 0> final {
-        auto operator()(F&& f) -> std::function<void(communication_module&)> {
-            return [f](communication_module&) -> void { f(); };
-        }
-    };
-
-    template<class F, class Args>
-    struct transformer<F, Args, 1> final {
-        auto operator()(F&& f) -> std::function<void(communication_module&)> {
-            return [f](communication_module& ctx) -> void {
-                using arg_type = type_traits::type_list_at_t<Args, 0>;
-                using clear_args_type = type_traits::decay_t<arg_type>;
-                auto& tmp = ctx.current_message()->body<clear_args_type>();
-                f(tmp);
-            };
-        }
-    };
-
     /// class method
     template<class F, class ClassPtr, std::size_t... I>
     void apply_impl_for_class(F&& f, ClassPtr* ptr, communication_module& ctx, type_traits::index_sequence<I...>) {
@@ -88,26 +69,6 @@ namespace actors_framework::base {
                 using call_trait = type_traits::get_callable_trait_t<type_traits::remove_reference_t<F>>;
                 constexpr int args_size = call_trait::number_of_arguments;
                 apply_impl_for_class(f, ptr, ctx, type_traits::make_index_sequence<args_size>{});
-            };
-        }
-    };
-
-    template<class F, class ClassPtr, class Args>
-    struct transformer_for_class<F, ClassPtr, Args, 0> final {
-        auto operator()(F&& f, ClassPtr* ptr) -> std::function<void(communication_module&)> {
-            return [f, ptr](communication_module&) -> void { (ptr->*f)(); };
-        }
-    };
-
-    template<class F, class ClassPtr, class Args>
-    struct transformer_for_class<F, ClassPtr, Args, 1> final {
-        auto operator()(F&& f, ClassPtr* ptr) -> std::function<void(communication_module&)> {
-            return [f, ptr](communication_module& arg) -> void {
-                using arg_type_0 = type_traits::type_list_at_t<Args, 0>;
-                using decay_arg_type_0 = type_traits::decay_t<arg_type_0>;
-                auto& tmp = arg.current_message()->body<decay_arg_type_0>();
-                using original_arg_type_0 = forward_arg<Args, 0>;
-                (ptr->*f)(std::forward<original_arg_type_0>(static_cast<original_arg_type_0>(tmp)));
             };
         }
     };

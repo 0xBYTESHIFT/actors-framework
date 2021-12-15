@@ -30,7 +30,7 @@ namespace actors_framework::base {
         return ptr;
     }
 
-    auto actor_abstract::address_book(const std::string& name) -> address_t {
+    auto actor_abstract::address_book(std::string name) -> address_t {
         auto it = contacts_.find(name);
         if (it == contacts_.end()) {
             auto mes = std::string("actor ") + address().type() + " can't find contact '" + name + "'";
@@ -54,9 +54,6 @@ namespace actors_framework::base {
 
     void actor_abstract::add_link_(address_t address) {
         if (address && this != address.get()) {
-            auto mes = std::string("actor ") + this->type() +
-                       " linking with " + address.type();
-            std::cout << mes << std::endl;
             auto name = address.type();
             contacts_.emplace(std::move(name), std::move(address));
         } else {

@@ -168,3 +168,5 @@ if (ALLOW_TESTS)
     enable_testing()
     add_subdirectory(test)
 endif ()
+
+add_subdirectory(benchmark)

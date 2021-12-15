@@ -102,9 +102,9 @@ namespace actors_framework::base {
         return tmp;
     }
 
-    auto supervisor_abstract::address_book(const std::string& type) -> address_t {
+    auto supervisor_abstract::address_book(std::string type) -> address_t {
         auto tmp = address_t::empty_address();
-        auto result = contacts_.find(type);
+        auto result = contacts_.find(std::move(type));
         if (result != contacts_.end()) {
             tmp = *(result->second.begin());
         }
