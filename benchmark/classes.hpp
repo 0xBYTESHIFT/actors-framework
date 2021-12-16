@@ -20,19 +20,19 @@ struct task {
 };
 
 struct task_stack_lite : task {
-    double data;
+    int8_t data;
 };
 
 struct task_stack_heavy : task {
-    double data[task_size];
+    int8_t data[task_size];
 };
 
 struct task_heap_lite : task {
-    std::shared_ptr<int> ptr = std::make_shared<int>(0);
+    std::shared_ptr<int8_t> ptr = std::make_shared<int8_t>(0);
 };
 
 struct task_heap_heavy : task {
-    std::vector<double> vec;
+    std::vector<int8_t> vec;
 };
 
 namespace names {
