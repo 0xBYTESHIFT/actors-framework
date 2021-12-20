@@ -10,7 +10,7 @@ namespace af = actors_framework;
 
 static constexpr size_t task_size = 1024 * 10;
 
-auto thread_pool_deleter = [](af::abstract_executor* ptr) -> void {
+static auto thread_pool_deleter = [](af::abstract_executor* ptr) -> void {
     ZoneScoped;
     ptr->stop();
     delete ptr;
