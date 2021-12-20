@@ -2,6 +2,7 @@
 #include <catch2/catch.hpp>
 
 #include <algorithm>
+#include <iostream>
 #include <limits>
 #include <numeric>
 
@@ -37,6 +38,7 @@ TEST_CASE("resend_order") {
     std::vector<size_t> desired(count, 0);
     std::iota(desired.begin(), desired.end(), 0);
 
-    auto& result = actor1::datas;
-    REQUIRE(std::equal(result.begin(), result.end(), desired.begin()));
+    const auto& result = actor1::datas;
+    const auto eq = std::equal(result.begin(), result.end(), desired.begin());
+    REQUIRE(eq);
 }
