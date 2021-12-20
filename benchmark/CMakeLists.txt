@@ -1,6 +1,6 @@
 project(benchmark CXX)
 
-set(SOURCE_FILES main.cpp)
+set(SOURCE_FILES main.cpp utils.cpp)
 
 message(STATUS "PROJECT_NAME = ${PROJECT_NAME}")
 

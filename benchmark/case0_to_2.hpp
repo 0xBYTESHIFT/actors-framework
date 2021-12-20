@@ -3,9 +3,12 @@
 #include <iostream>
 
 #include "classes.hpp"
+#include "utils.h"
+
 using namespace std::chrono_literals;
 
 void case0_to_2(size_t actors0_count, size_t actors1_count, size_t count, size_t workers, size_t max_queue) {
+    ZoneScoped;
     const auto time0 = std::chrono::steady_clock::now();
 
     af::supervisor supervisor0(new supervisor_lite("supervisor0", workers, max_queue));
@@ -39,6 +42,7 @@ void case0_to_2(size_t actors0_count, size_t actors1_count, size_t count, size_t
         const int sheavy = actor1::count_stack_heavy.load(std::memory_order_acquire);
         const int hlite = actor1::count_heap_lite.load(std::memory_order_acquire);
         const int hheavy = actor1::count_heap_heavy.load(std::memory_order_acquire);
+        utils::print_counts();
 
         if (slite == count and
             sheavy == count and

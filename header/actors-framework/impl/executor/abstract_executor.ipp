@@ -13,6 +13,7 @@ namespace actors_framework::executor {
         : next_worker_(0)
         , max_throughput_(max_throughput)
         , num_workers_(num_worker_threads) {
+        ZoneScoped;
     }
     auto abstract_executor::max_throughput() const -> size_t {
         return max_throughput_;
@@ -23,11 +24,13 @@ namespace actors_framework::executor {
     }
 
     void cleanup_and_release(executable* ptr) {
+        ZoneScoped;
         class dummy_unit final : public execution_device {
         public:
             dummy_unit() = default;
 
             void execute(executable* job) override {
+                ZoneScoped;
                 executables_.push_back(job);
             }
 

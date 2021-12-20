@@ -30,11 +30,16 @@ namespace actors_framework::base {
     }
 
     communication_module::communication_module(std::string type)
-        : type_(std::move(type)) {}
+        : type_(std::move(type)) {
+        ZoneScoped;
+    }
 
-    communication_module::~communication_module() {}
+    communication_module::~communication_module() {
+        ZoneScoped;
+    }
 
     void communication_module::execute() {
+        ZoneScoped;
         auto it = handlers_.find(current_message()->command());
         if (it != handlers_.end()) {
             return it->second->invoke(*this);
@@ -46,6 +51,7 @@ namespace actors_framework::base {
     }
 
     bool communication_module::on(const std::string& name, handler* aa) {
+        ZoneScoped;
         auto it = handlers_.find(name);
         bool status = false;
         if (it == handlers_.end()) {
@@ -62,10 +68,12 @@ namespace actors_framework::base {
     }
 
     void communication_module::enqueue(message_ptr msg) {
+        ZoneScoped;
         enqueue(std::move(msg), nullptr);
     }
 
     auto communication_module::message_types() const -> std::set<std::string> {
+        ZoneScoped;
         std::set<std::string> types;
 
         for (const auto& i : handlers_) {
@@ -80,6 +88,7 @@ namespace actors_framework::base {
     }
 
     void communication_module::enqueue(message_ptr msg, executor::execution_device* e) {
+        ZoneScoped;
         enqueue_base(std::move(msg), e);
     }
     auto communication_module::current_message() -> message* {

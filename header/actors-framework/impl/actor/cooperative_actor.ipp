@@ -14,12 +14,16 @@ namespace actors_framework::base {
     cooperative_actor_base::cooperative_actor_base(supervisor_abstract* supervisor, std::string type)
         : actor_abstract(std::move(type))
         , supervisor_m_(supervisor) {
+        ZoneScoped;
         flags_(state::empty);
     }
 
-    cooperative_actor_base::~cooperative_actor_base() {}
+    cooperative_actor_base::~cooperative_actor_base() {
+        ZoneScoped;
+    }
 
     auto cooperative_actor_base::activate_(executor::execution_device* ctx) -> bool {
+        ZoneScoped;
         //assert(ctx != nullptr);
         if (ctx) {
             context_(ctx);
@@ -42,10 +46,12 @@ namespace actors_framework::base {
     }
 
     auto cooperative_actor_base::flags_() const -> state {
+        ZoneScoped;
         return flags_m_.load(std::memory_order_relaxed);
     }
 
     void cooperative_actor_base::flags_(state new_value) {
+        ZoneScoped;
         flags_m_.store(new_value, std::memory_order_relaxed);
     }
 } // namespace actors_framework::base

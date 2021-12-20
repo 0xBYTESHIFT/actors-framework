@@ -6,6 +6,7 @@
 #include <mutex>
 
 #include <actors-framework/executor/policy/unprofiled.hpp>
+#include <actors-framework/utils/tracy_include.hpp>
 
 namespace actors_framework::executor {
     ///
@@ -20,7 +21,9 @@ namespace actors_framework::executor {
         /// @brief
         ///
         struct coordinator_data final {
-            inline explicit coordinator_data(abstract_executor*) {}
+            inline explicit coordinator_data(abstract_executor*) {
+                ZoneScoped;
+            }
             queue_type queue;
             std::mutex lock;
             std::condition_variable cv;
@@ -29,11 +32,14 @@ namespace actors_framework::executor {
         /// @brief
         ///
         struct worker_data final {
-            inline explicit worker_data(abstract_executor*) {}
+            inline explicit worker_data(abstract_executor*) {
+                ZoneScoped;
+            }
         };
 
         template<class Coordinator>
         void enqueue(Coordinator* self, executable* job) {
+            ZoneScoped;
             queue_type l;
             l.push_back(job);
             std::unique_lock<std::mutex> guard(cast(self).lock);
@@ -43,29 +49,34 @@ namespace actors_framework::executor {
 
         template<class Coordinator>
         void central_enqueue(Coordinator* self, executable* job) {
+            ZoneScoped;
             enqueue(self, job);
         }
 
         template<class Worker>
         void external_enqueue(Worker* self, executable* job) {
+            ZoneScoped;
             enqueue(self->parent(), job);
         }
 
         template<class Worker>
         void internal_enqueue(Worker* self, executable* job) {
+            ZoneScoped;
             enqueue(self->parent(), job);
         }
 
         template<class Worker>
         void resume_job_later(Worker* self, executable* job) {
+            ZoneScoped;
             enqueue(self->parent(), job);
         }
 
         template<class Worker>
         auto dequeue(Worker* self) -> executable* {
+            ZoneScoped;
             auto& parent_data = cast(self->parent());
             std::unique_lock<std::mutex> guard(parent_data.lock);
-            parent_data.cv.wait(guard, [&] { return !parent_data.queue.empty(); });
+            parent_data.cv.wait(guard, [&] { return !parent_data.queue.empty(); }); //wait for a message
             executable* job = parent_data.queue.front();
             parent_data.queue.pop_front();
             return job;
@@ -73,10 +84,12 @@ namespace actors_framework::executor {
 
         template<class Worker, class UnaryFunction>
         void foreach_resumable(Worker*, UnaryFunction) {
+            ZoneScoped;
         }
 
         template<class Coordinator, class UnaryFunction>
         void foreach_central_resumable(Coordinator* self, UnaryFunction f) {
+            ZoneScoped;
             auto& queue = cast(self).queue;
             auto next = [&]() -> executable* {
                 if (queue.empty()) {

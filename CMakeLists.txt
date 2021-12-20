@@ -16,6 +16,7 @@ option(RTTI_DISABLE "RTTI DISABLE" ON)
 option(USE_CAF_LOCKFREE_QUEUE "USE_CAF_LOCKFREE_QUEUE" OFF)
 option(USE_SIMPLE_QUEUE "USE_SIMPLE_QUEUE" OFF)
 option(USE_MOODYCAMEL_LOCKFREE_QUEUE "USE_MOODYCAMEL_LOCKFREE_QUEUE" OFF)
+option(USE_TRACY_PROFILER "Use tracy profiler" OFF)
 
 message(STATUS "ALLOW_EXAMPLES = ${ALLOW_EXAMPLES}")
 message(STATUS "ALLOW_TESTS = ${ALLOW_TESTS}")
@@ -59,6 +60,17 @@ if(USE_MOODYCAMEL_LOCKFREE_QUEUE)
       GIT_REPOSITORY https://github.com/cameron314/concurrentqueue
     )
     include_directories(${moodycamel_lfqueue_SOURCE_DIR})
+endif()
+
+if(USE_TRACY_PROFILER)
+    CPMAddPackage(
+      NAME          tracy
+      VERSION       0.7.8
+      GIT_REPOSITORY https://github.com/wolfpld/tracy
+      DOWNLOAD_ONLY TRUE
+    )
+    set(TRACY_ROOT ${tracy_SOURCE_DIR})
+    include_directories(${TRACY_ROOT})
 endif()
 
 include_directories(SYSTEM .)
@@ -107,6 +119,11 @@ set(HEADER_FILES
 set(SOURCE_FILES
         source/src.cpp
 )
+
+if(USE_TRACY_PROFILER)
+    list(APPEND SOURCE_FILES ${TRACY_ROOT}/TracyClient.cpp)
+    add_compile_definitions(TRACY_ENABLE=1 TRACY_ON_DEMAND=1)
+endif()
 
 find_program(CCACHE_FOUND ccache)
 if (CCACHE_FOUND)

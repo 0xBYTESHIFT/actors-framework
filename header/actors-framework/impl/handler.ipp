@@ -3,6 +3,7 @@
 #include <actors-framework/detail/callable_trait.hpp>
 #include <actors-framework/detail/type_list.hpp>
 #include <actors-framework/forwards.hpp>
+#include <actors-framework/utils/tracy_include.hpp>
 
 namespace actors_framework::base {
     template<class List, std::size_t I>
@@ -24,6 +25,7 @@ namespace actors_framework::base {
 
     template<class F, std::size_t... I>
     void apply_impl(F&& f, communication_module& ctx, type_traits::index_sequence<I...>) {
+        ZoneScoped;
         using call_trait = type_traits::get_callable_trait_t<type_traits::remove_reference_t<F>>;
         constexpr int args_size = call_trait::number_of_arguments;
         using args_type_list = type_traits::tl_slice_t<typename call_trait::args_types, 0, args_size>;
@@ -39,6 +41,7 @@ namespace actors_framework::base {
                  type_traits::get_callable_trait<F>::number_of_arguments>
     struct transformer {
         auto operator()(F&& f) -> std::function<void(communication_module&)> {
+            ZoneScoped;
             return [f](communication_module& ctx) -> void {
                 using call_trait =
                     type_traits::get_callable_trait_t<type_traits::remove_reference_t<F>>;
@@ -51,6 +54,7 @@ namespace actors_framework::base {
     /// class method
     template<class F, class ClassPtr, std::size_t... I>
     void apply_impl_for_class(F&& f, ClassPtr* ptr, communication_module& ctx, type_traits::index_sequence<I...>) {
+        ZoneScoped;
         using call_trait = type_traits::get_callable_trait_t<type_traits::remove_reference_t<F>>;
         using args_type_list = typename call_trait::args_types;
         using Tuple = type_list_to_tuple_t<args_type_list>;
@@ -65,6 +69,7 @@ namespace actors_framework::base {
              int Args_size = type_traits::get_callable_trait<F>::number_of_arguments>
     struct transformer_for_class {
         auto operator()(F&& f, ClassPtr* ptr) -> std::function<void(communication_module&)> {
+            ZoneScoped;
             return [f, ptr](communication_module& ctx) -> void {
                 using call_trait = type_traits::get_callable_trait_t<type_traits::remove_reference_t<F>>;
                 constexpr int args_size = call_trait::number_of_arguments;

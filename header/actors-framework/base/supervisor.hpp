@@ -2,6 +2,7 @@
 
 #include <actors-framework/detail/intrusive_ptr.hpp>
 #include <actors-framework/forwards.hpp>
+#include <actors-framework/utils/tracy_include.hpp>
 
 #include <type_traits>
 
@@ -17,18 +18,23 @@ namespace actors_framework::base {
             class T,
             class = type_traits::enable_if_t<std::is_base_of_v<supervisor_abstract, T>>>
         supervisor(intrusive_ptr<T> ptr)
-            : ptr_(std::move(ptr)) {}
+            : ptr_(std::move(ptr)) {
+            ZoneScoped;
+        }
 
         template<
             class T,
             class = type_traits::enable_if_t<std::is_base_of_v<supervisor_abstract, T>>>
         supervisor(T* ptr)
-            : ptr_(ptr) {}
+            : ptr_(ptr) {
+            ZoneScoped;
+        }
 
         template<
             class T,
             class = type_traits::enable_if_t<std::is_base_of_v<supervisor_abstract, T>>>
         supervisor& operator=(intrusive_ptr<T> ptr) {
+            ZoneScoped;
             supervisor tmp{std::move(ptr)};
             swap_(tmp);
             return *this;
@@ -38,6 +44,7 @@ namespace actors_framework::base {
             class T,
             class = type_traits::enable_if_t<std::is_base_of_v<supervisor_abstract, T>>>
         supervisor& operator=(T* ptr) {
+            ZoneScoped;
             supervisor tmp{ptr};
             swap_(tmp);
             return *this;

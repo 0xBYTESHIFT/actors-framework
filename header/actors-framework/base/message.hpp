@@ -1,10 +1,11 @@
 #pragma once
 
 #include <cassert>
+#include <string>
 
 #include <actors-framework/detail/any.hpp>
 #include <actors-framework/forwards.hpp>
-#include <string>
+#include <actors-framework/utils/tracy_include.hpp>
 
 namespace actors_framework::base {
 
@@ -40,12 +41,14 @@ namespace actors_framework::base {
 
         template<class T>
         auto body() const -> const T& {
+            ZoneScoped;
             assert(body_.has_value());
             return detail::any_cast<const T&>(body_);
         }
 
         template<class T>
         auto body() -> T& {
+            ZoneScoped;
             assert(body_.has_value());
             return detail::any_cast<T&>(body_);
         }

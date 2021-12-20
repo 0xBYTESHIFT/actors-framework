@@ -6,6 +6,7 @@
 
 #include <actors-framework/executor/executable.hpp>
 #include <actors-framework/executor/execution_device.hpp>
+#include <actors-framework/utils/tracy_include.hpp>
 
 namespace actors_framework::executor {
 
@@ -56,29 +57,27 @@ namespace actors_framework::executor {
         , id_(worker_id)
         , parent_(worker_parent)
         , data_(init) {
+        ZoneScoped;
     }
 
     template<class Policy>
     void worker<Policy>::start() {
-        ///assert(this_thread_.get_id() == std::thread::id{}); TODO: do not check; see implement asio
-        auto current_worker = this;
+        ZoneScoped;
         this_thread_ = std::thread{
-            [current_worker] {
-                /// TODO: hook
-                current_worker->run_();
-                /// TODO: hook
+            [this] {
+                run_();
             }};
     }
 
     template<class Policy>
     void worker<Policy>::external_enqueue(job_ptr job) {
-        assert(job != nullptr); /// TODO: do not check
+        ZoneScoped;
         policy_.external_enqueue(this, job);
     }
 
     template<class Policy>
     void worker<Policy>::execute(job_ptr job) {
-        assert(job != nullptr); /// TODO: do not check
+        ZoneScoped;
         policy_.internal_enqueue(this, job);
     }
 
@@ -109,11 +108,14 @@ namespace actors_framework::executor {
 
     template<class Policy>
     void worker<Policy>::run_() {
+        ZoneScoped;
         for (;;) {
-            auto job = policy_.dequeue(this);
-            assert(job != nullptr); /// TODO: do not check
+            decltype(auto) job = policy_.dequeue(this); //blocking call
+            if (!job) {
+                continue;
+            }
             policy_.before_resume(this, job);
-            auto res = job->run(this, max_throughput_);
+            decltype(auto) res = job->run(this, max_throughput_);
             policy_.after_resume(this, job);
             switch (res) {
                 case executable_result::resume: {
@@ -122,11 +124,11 @@ namespace actors_framework::executor {
                 }
                 case executable_result::done: {
                     policy_.after_completion(this, job);
-                    intrusive_ptr_release(job);
+                    intrusive_ptr_release(job); //sets as free
                     break;
                 }
                 case executable_result::awaiting: {
-                    intrusive_ptr_release(job);
+                    intrusive_ptr_release(job); //sets as free
                     break;
                 }
                 case executable_result::shutdown: {
@@ -134,6 +136,8 @@ namespace actors_framework::executor {
                     policy_.before_shutdown(this);
                     return;
                 }
+                default:
+                    assert(false /*"unknown executable_result"*/);
             }
         }
     }

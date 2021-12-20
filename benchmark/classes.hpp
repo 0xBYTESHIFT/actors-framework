@@ -11,6 +11,7 @@ namespace af = actors_framework;
 static constexpr size_t task_size = 1024 * 10;
 
 auto thread_pool_deleter = [](af::abstract_executor* ptr) -> void {
+    ZoneScoped;
     ptr->stop();
     delete ptr;
 };
@@ -21,18 +22,35 @@ struct task {
 
 struct task_stack_lite : task {
     int8_t data;
+
+    task_stack_lite() {
+        ZoneScoped;
+    }
 };
 
 struct task_stack_heavy : task {
     int8_t data[task_size];
+
+    task_stack_heavy() {
+        ZoneScoped;
+    }
 };
 
 struct task_heap_lite : task {
     std::shared_ptr<int8_t> ptr = std::make_shared<int8_t>(0);
+
+    task_heap_lite() {
+        ZoneScoped;
+    }
 };
 
 struct task_heap_heavy : task {
     std::vector<int8_t> vec;
+
+    task_heap_heavy() {
+        ZoneScoped;
+        vec.resize(task_size, 0);
+    }
 };
 
 namespace names {
@@ -70,6 +88,7 @@ public:
 
     explicit actor1(af::supervisor_abstract* ptr, size_t id)
         : af::basic_async_actor(ptr, get_name(id)) {
+        ZoneScoped;
         add_handler("spawn_broadcast", &actor1::spawn_broadcast);
         add_handler(names::actor1::callback_stack_lite_name, &actor1::callback_stack_lite);
         add_handler(names::actor1::callback_stack_heavy_name, &actor1::callback_stack_heavy);
@@ -78,10 +97,12 @@ public:
     }
 
     auto spawn_broadcast(af::address_t sender, af::address_t addr) -> void {
+        ZoneScoped;
         //nop
     }
 
     auto callback_stack_lite(task_stack_lite& task_) -> void {
+        ZoneScoped;
         [[maybe_unused]] auto task = std::move(task_);
         count_stack_lite.fetch_add(1, std::memory_order_release);
         auto now = std::chrono::steady_clock::now();
@@ -90,6 +111,7 @@ public:
         time_ns_stack_lite /= 2.0;
     }
     auto callback_stack_heavy(task_stack_heavy& task_) -> void {
+        ZoneScoped;
         [[maybe_unused]] auto task = std::move(task_);
         count_stack_heavy.fetch_add(1, std::memory_order_release);
         auto now = std::chrono::steady_clock::now();
@@ -98,6 +120,7 @@ public:
         time_ns_stack_heavy /= 2;
     }
     auto callback_heap_lite(task_heap_lite& task_) -> void {
+        ZoneScoped;
         [[maybe_unused]] auto task = std::move(task_);
         count_heap_lite.fetch_add(1, std::memory_order_release);
         auto now = std::chrono::steady_clock::now();
@@ -106,6 +129,7 @@ public:
         time_ns_heap_lite /= 2;
     }
     auto callback_heap_heavy(task_heap_heavy& task_) -> void {
+        ZoneScoped;
         [[maybe_unused]] auto task = std::move(task_);
         count_heap_heavy.fetch_add(1, std::memory_order_release);
         auto now = std::chrono::steady_clock::now();
@@ -129,6 +153,7 @@ public:
 
     explicit actor0(af::supervisor_abstract* ptr, size_t id)
         : af::basic_async_actor(ptr, get_name(id)) {
+        ZoneScoped;
         add_handler("spawn_broadcast", &actor0::spawn_broadcast);
         add_handler(names::actor0::send_stack_lite_name, &actor0::send_stack_lite);
         add_handler(names::actor0::send_stack_heavy_name, &actor0::send_stack_heavy);
@@ -137,6 +162,7 @@ public:
     }
 
     auto spawn_broadcast(af::address_t sender, af::address_t addr) -> void {
+        ZoneScoped;
         std::string type_str = addr.type();
         type_str.erase(type_str.size() - 1); //delete last letter (id)
         if (type_str == names::actor1::name) {
@@ -147,6 +173,7 @@ public:
     }
 
     auto send_stack_lite() -> void {
+        ZoneScoped;
         task_stack_lite task;
         auto& id = actor1_id_slite_;
 
@@ -159,6 +186,7 @@ public:
         }
     }
     auto send_stack_heavy() -> void {
+        ZoneScoped;
         task_stack_heavy task;
         auto& id = actor1_id_sheavy_;
 
@@ -171,6 +199,7 @@ public:
         }
     }
     auto send_heap_lite() -> void {
+        ZoneScoped;
         task_heap_lite task;
         auto& id = actor1_id_hlite_;
 
@@ -183,8 +212,8 @@ public:
         }
     }
     auto send_heap_heavy() -> void {
+        ZoneScoped;
         task_heap_heavy task;
-        task.vec.resize(task_size, 0);
         auto& id = actor1_id_hheavy_;
 
         auto addr = address_book(actor1::get_name(id));
@@ -211,6 +240,7 @@ public:
                   "spawn_broadcast",
                   "create_actor0",
                   "create_actor1"} {
+        ZoneScoped;
         add_handler("spawn_broadcast", &supervisor_lite::spawn_broadcast);
         add_handler("create_actor0", &supervisor_lite::create_actor0);
         add_handler("create_actor1", &supervisor_lite::create_actor1);
@@ -218,26 +248,32 @@ public:
     }
 
     void create_actor0(size_t id) {
+        ZoneScoped;
         spawn_actor<actor0>(id);
     }
 
     void create_actor1(size_t id) {
+        ZoneScoped;
         spawn_actor<actor1>(id);
     }
 
     auto executor_impl() noexcept -> af::abstract_executor* final {
+        ZoneScoped;
         return e_.get();
     }
 
     auto add_actor_impl(af::actor t) -> void final {
+        ZoneScoped;
         spawn_broadcast(address(), t->address());
         actors_.emplace_back(std::move(t));
     }
 
     auto add_supervisor_impl(af::supervisor t) -> void final {
+        ZoneScoped;
     }
 
     auto spawn_broadcast(af::address_t sender, af::address_t addr) -> void {
+        ZoneScoped;
         auto contacts = address_book();
         for (auto it = contacts.first; it != contacts.second; ++it) {
             if (it->first != sender.type()) {
@@ -248,6 +284,7 @@ public:
     }
 
     auto enqueue_base(af::message_ptr msg, af::execution_device*) -> void final {
+        ZoneScoped;
         auto msg_ = std::move(msg);
         auto it = system_.find(msg_->command());
         if (it != system_.end()) {
@@ -257,6 +294,7 @@ public:
 
 private:
     auto local(af::message_ptr msg) -> void {
+        ZoneScoped;
         set_current_message(std::move(msg));
         execute();
     }
