@@ -45,12 +45,6 @@ public:
 
     void stop() override {}
 };
-/*
-auto thread_pool_deleter = [](actors_framework::abstract_executor* ptr) -> void {
-    ptr->stop();
-    delete ptr;
-};
-*/
 
 auto thread_pool_deleter = [](dummy_executor* ptr) -> void {
     ptr->stop();
