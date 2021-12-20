@@ -3,6 +3,8 @@
 
 namespace actors_framework::executor {
 
-    executable::~executable() {}
+    executable::~executable() {
+        ZoneScoped;
+    }
 
 } // namespace actors_framework::executor

@@ -45,6 +45,7 @@ namespace actors_framework::base {
     supervisor_abstract::supervisor_abstract(detail::pmr::memory_resource* mr, std::string name)
         : communication_module(std::move(name))
         , memory_resource_(mr) {
+        ZoneScoped;
         add_handler("delegate", &supervisor_abstract::redirect_);
         add_handler("add_link", &supervisor_abstract::add_link_);
         add_handler("remove_link", &supervisor_abstract::remove_link_);
@@ -53,6 +54,7 @@ namespace actors_framework::base {
     supervisor_abstract::supervisor_abstract(std::string name)
         : communication_module(std::move(name))
         , memory_resource_(new new_delete_resource) {
+        ZoneScoped;
         add_handler("delegate", &supervisor_abstract::redirect_);
         add_handler("add_link", &supervisor_abstract::add_link_);
         add_handler("remove_link", &supervisor_abstract::remove_link_);
@@ -61,11 +63,14 @@ namespace actors_framework::base {
     supervisor_abstract::supervisor_abstract(supervisor_abstract* ptr, std::string name)
         : communication_module(std::move(name))
         , memory_resource_(ptr->resource()) {
+        ZoneScoped;
         add_handler("delegate", &supervisor_abstract::redirect_);
         add_handler("add_link", &supervisor_abstract::add_link_);
         add_handler("remove_link", &supervisor_abstract::remove_link_);
     }
-    supervisor_abstract::~supervisor_abstract() {}
+    supervisor_abstract::~supervisor_abstract() {
+        ZoneScoped;
+    }
 
     auto supervisor_abstract::current_message_impl() -> message* {
         return current_message_;
@@ -84,6 +89,7 @@ namespace actors_framework::base {
     }
 
     auto supervisor_abstract::redirect_(const std::string& type_, message* msg_) -> void {
+        ZoneScoped;
         message_ptr msg(std::move(msg_));
         auto type = std::move(type_);
         msg->sender() = this->address();
@@ -95,6 +101,7 @@ namespace actors_framework::base {
     }
 
     auto supervisor_abstract::all_view_address() const -> std::set<std::string> {
+        ZoneScoped;
         std::set<std::string> tmp;
         for (const auto& [name, address] : contacts_) {
             tmp.emplace(name);
@@ -102,9 +109,10 @@ namespace actors_framework::base {
         return tmp;
     }
 
-    auto supervisor_abstract::address_book(const std::string& type) -> address_t {
+    auto supervisor_abstract::address_book(std::string type) -> address_t {
+        ZoneScoped;
         auto tmp = address_t::empty_address();
-        auto result = contacts_.find(type);
+        auto result = contacts_.find(std::move(type));
         if (result != contacts_.end()) {
             tmp = *(result->second.begin());
         }
@@ -112,14 +120,17 @@ namespace actors_framework::base {
     }
 
     auto supervisor_abstract::address_book() -> address_range_t {
+        ZoneScoped;
         return std::make_pair(contacts_.cbegin(), contacts_.cend());
     }
 
     void supervisor_abstract::remove_link_() {
+        ZoneScoped;
         remove_link_impl_(current_message()->sender());
     }
 
     void supervisor_abstract::add_link_(address_t address) {
+        ZoneScoped;
         if (address && this != address.get()) {
             auto name = address.type();
             auto it = contacts_.find(name);
@@ -137,6 +148,7 @@ namespace actors_framework::base {
     }
 
     void supervisor_abstract::remove_link_impl_(const address_t& address) {
+        ZoneScoped;
         auto name = address.type();
         auto it = contacts_.find(name);
         if (it == contacts_.end()) {
@@ -152,6 +164,7 @@ namespace actors_framework::base {
     }
 
     auto supervisor_abstract::broadcast(message_ptr msg_) -> void {
+        ZoneScoped;
         auto msg = std::move(msg_);
 
         for (auto& i : contacts_) {
@@ -162,6 +175,7 @@ namespace actors_framework::base {
     }
 
     auto supervisor_abstract::broadcast(std::string type, message_ptr msg_) -> void {
+        ZoneScoped;
         auto msg = std::move(msg_);
         auto range = contacts_.find(type);
         if (range == contacts_.end()) {
@@ -174,6 +188,7 @@ namespace actors_framework::base {
     }
 
     void supervisor_abstract::sync_(const base::address_t& address) {
+        ZoneScoped;
         auto address_tmp(address);
         add_link_(address_t(address));
         send(address_tmp, this->address(), "add_link", this->address());

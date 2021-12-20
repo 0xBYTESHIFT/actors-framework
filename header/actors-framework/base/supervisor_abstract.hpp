@@ -2,6 +2,7 @@
 
 #include <actors-framework/base/communication_module.hpp>
 #include <actors-framework/detail/pmr/memory_resource.hpp>
+#include <actors-framework/utils/tracy_include.hpp>
 
 namespace actors_framework::base {
     class supervisor_abstract : public communication_module {
@@ -28,6 +29,7 @@ namespace actors_framework::base {
             class... Args,
             class = type_traits::enable_if_t<std::is_base_of_v<actor_abstract, Actor>>>
         auto spawn_actor(Args&&... args) -> address_t {
+            ZoneScoped;
             auto allocate_byte = sizeof(Actor);
             auto allocate_byte_alignof = alignof(Actor);
             void* buffer = resource()->allocate(allocate_byte, allocate_byte_alignof);
@@ -43,6 +45,7 @@ namespace actors_framework::base {
             class... Args,
             class = type_traits::enable_if_t<std::is_base_of_v<supervisor_abstract, Supervisor>>>
         auto spawn_supervisor(Args&&... args) -> address_t {
+            ZoneScoped;
             auto allocate_byte = sizeof(Supervisor);
             auto allocate_byte_alignof = alignof(Supervisor);
             void* buffer = resource()->allocate(allocate_byte, allocate_byte_alignof);
@@ -58,7 +61,7 @@ namespace actors_framework::base {
         virtual auto add_supervisor_impl(supervisor) -> void = 0;
         auto set_current_message(message_ptr) -> void;
         auto current_message_impl() -> message* final;
-        auto address_book(const std::string& type) -> address_t;
+        auto address_book(std::string type) -> address_t;
         auto address_book() -> address_range_t;
         /**
         * debug method

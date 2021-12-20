@@ -8,9 +8,13 @@
 namespace actors_framework::base {
 
     supervisor::supervisor(std::nullptr_t)
-        : ptr_(nullptr) {}
+        : ptr_(nullptr) {
+        ZoneScoped;
+    }
 
-    supervisor::~supervisor() {}
+    supervisor::~supervisor() {
+        ZoneScoped;
+    }
 
     auto supervisor::operator=(std::nullptr_t) -> supervisor& {
         ptr_.reset();

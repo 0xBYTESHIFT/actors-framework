@@ -10,6 +10,7 @@
 
 #include <actors-framework/executor/policy/profiled.hpp>
 #include <actors-framework/forwards.hpp>
+#include <actors-framework/utils/tracy_include.hpp>
 
 namespace actors_framework::executor {
     using std::setw;
@@ -120,6 +121,7 @@ namespace actors_framework::executor {
     }
 
     void profiled_executor<>::start() {
+        ZoneScoped;
         clock_start_ = clock_type::now().time_since_epoch();
         super::start();
         worker_states_.resize(this->num_workers());
@@ -136,6 +138,7 @@ namespace actors_framework::executor {
     }
 
     void profiled_executor<>::stop() {
+        ZoneScoped;
         super::stop();
         auto now = clock_type::now().time_since_epoch();
         auto wall_clock = system_start_ + (now - clock_start_);
@@ -170,6 +173,7 @@ namespace actors_framework::executor {
     }
 
     void profiled_executor<>::remove_job(actor_id job) {
+        ZoneScoped;
         std::lock_guard<std::mutex> job_guard{job_mtx_};
         auto j = jobs_.find(job);
         if (j != jobs_.end()) {

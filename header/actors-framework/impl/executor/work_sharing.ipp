@@ -4,6 +4,7 @@
 namespace actors_framework::executor {
 
     work_sharing::~work_sharing() {
+        ZoneScoped;
         // nop
     }
 

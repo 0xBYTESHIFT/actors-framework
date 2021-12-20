@@ -7,14 +7,18 @@
 
 namespace actors_framework::base {
     actor::actor(std::nullptr_t)
-        : ptr_(nullptr) {}
+        : ptr_(nullptr) {
+        ZoneScoped;
+    }
 
     actor& actor::operator=(std::nullptr_t) {
         ptr_.reset();
         return *this;
     }
 
-    actor::~actor() {}
+    actor::~actor() {
+        ZoneScoped;
+    }
 
     auto actor::address() const noexcept -> address_t {
         return ptr_->address();
@@ -37,6 +41,7 @@ namespace actors_framework::base {
     }
 
     void actor::swap_(actor& other) noexcept {
+        ZoneScoped;
         using std::swap;
         ptr_.swap(other.ptr_);
     }

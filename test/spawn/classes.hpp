@@ -26,7 +26,7 @@ auto make_task_broadcast(af::supervisor& executor_, const std::string& command, 
     executor_->broadcast(std::move(msg));
 }
 
-auto thread_pool_deleter = [](af::abstract_executor* ptr) -> void {
+static auto thread_pool_deleter = [](af::abstract_executor* ptr) -> void {
     ptr->stop();
     delete ptr;
 };

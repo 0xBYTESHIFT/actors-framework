@@ -10,6 +10,7 @@ namespace actors_framework {
         class... Args,
         class = type_traits::enable_if_t<std::is_base_of_v<base::supervisor_abstract, ChildrenSupervisor>>>
     auto spawn_supervisor(Args&&... args) -> base::supervisor {
+        ZoneScoped;
         return base::supervisor(new ChildrenSupervisor(std::forward<Args>(args)...));
     }
 

@@ -11,6 +11,7 @@
 #include <actors-framework/executor/abstract_executor.hpp>
 #include <actors-framework/executor/executable.hpp>
 #include <actors-framework/executor/worker.hpp>
+#include <actors-framework/utils/tracy_include.hpp>
 
 namespace actors_framework::executor {
     /// @brief
@@ -43,25 +44,30 @@ namespace actors_framework::executor {
     executor_t<Policy>::executor_t(size_t num_worker_threads, size_t max_throughput_param)
         : abstract_executor(num_worker_threads, max_throughput_param)
         , data_(this) {
+        ZoneScoped;
     }
 
     template<class Policy>
     auto executor_t<Policy>::worker_by_id(size_t x) -> worker_type* {
+        ZoneScoped;
         return workers_[x].get();
     }
 
     template<class Policy>
     void executor_t<Policy>::execute(job_ptr job) {
+        ZoneScoped;
         policy_.central_enqueue(this, job);
     }
 
     template<class Policy>
     auto executor_t<Policy>::data() -> policy_data& {
+        ZoneScoped;
         return data_;
     }
 
     template<class Policy>
     void executor_t<Policy>::start() {
+        ZoneScoped;
         typename worker_type::policy_data init{this};
         auto num = num_workers();
         workers_.reserve(num);
@@ -77,11 +83,13 @@ namespace actors_framework::executor {
 
     template<class Policy>
     void executor_t<Policy>::stop() {
+        ZoneScoped;
         /// shutdown workers
         struct shutdown_helper final
             : public executable
             , public ref_counted {
             auto run(execution_device* ptr, size_t) -> executable_result override {
+                ZoneScoped;
                 assert(ptr != nullptr);
                 {
                     std::unique_lock<std::mutex> guard(mtx);

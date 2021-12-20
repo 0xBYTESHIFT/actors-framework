@@ -35,16 +35,6 @@ namespace actors_framework {
 #define CPP17_OR_GREATER (CPLUSPLUS >= 201703L)
 #define CPP20_OR_GREATER (CPLUSPLUS >= 202000L)
 
-#if CPP17_OR_GREATER && defined(__has_include)
-#if __has_include(<any> )
-#define HAVE_STD_ANY 1
-#else
-#define HAVE_STD_ANY 0
-#endif
-#else
-#define HAVE_STD_ANY 0
-#endif
-
 #define CACHE_LINE_SIZE 64
 
 #ifndef NODISCARD

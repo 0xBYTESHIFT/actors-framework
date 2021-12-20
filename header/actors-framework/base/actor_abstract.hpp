@@ -32,7 +32,7 @@ namespace actors_framework::base {
         void* operator new(size_t);
         void* operator new[](size_t);
 
-        auto address_book(const std::string&) -> address_t;
+        auto address_book(std::string) -> address_t;
         /**
         * debug method
         */

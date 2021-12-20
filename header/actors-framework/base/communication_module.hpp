@@ -11,6 +11,7 @@
 #include <actors-framework/detail/callable_trait.hpp>
 #include <actors-framework/detail/ref_counted.hpp>
 #include <actors-framework/forwards.hpp>
+#include <actors-framework/utils/tracy_include.hpp>
 
 namespace actors_framework::base {
 
@@ -41,11 +42,13 @@ namespace actors_framework::base {
 
         template<class F>
         auto add_handler(const std::string& name, F&& f) -> typename std::enable_if_t<!std::is_member_function_pointer_v<F>> {
+            ZoneScoped;
             on(name, make_handler(std::forward<F>(f)));
         }
 
         template<class F>
         auto add_handler(const std::string& name, F&& f) -> typename std::enable_if_t<std::is_member_function_pointer_v<F>> {
+            ZoneScoped;
             using class_type = typename type_traits::get_callable_trait_t<F>::class_type;
             auto class_cast = static_cast<class_type*>(this);
             on(name, make_handler(std::forward<F>(f), class_cast));

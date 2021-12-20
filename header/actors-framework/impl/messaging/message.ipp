@@ -9,21 +9,28 @@ namespace actors_framework::base {
     message::message(address_t sender, std::string name)
         : sender_(std::move(sender))
         , command_(std::move(name))
-        , body_() {}
+        , body_() {
+        ZoneScoped;
+    }
 
     message::message(address_t sender, std::string name, detail::any body)
         : sender_(std::move(sender))
         , command_(std::move(name))
-        , body_(std::move(body)) {}
+        , body_(std::move(body)) {
+        ZoneScoped;
+    }
 
     message::message()
-        : sender_(address_t::empty_address()) {}
+        : sender_(address_t::empty_address()) {
+        ZoneScoped;
+    }
 
     auto message::command() const noexcept -> const std::string& {
         return command_;
     }
 
     auto message::clone() const -> message* {
+        ZoneScoped;
         return new message(sender_, command_, body_);
     }
 
@@ -32,6 +39,7 @@ namespace actors_framework::base {
     }
 
     void message::swap(message& other) noexcept {
+        ZoneScoped;
         using std::swap;
         swap(sender_, other.sender_);
         swap(command_, other.command_);

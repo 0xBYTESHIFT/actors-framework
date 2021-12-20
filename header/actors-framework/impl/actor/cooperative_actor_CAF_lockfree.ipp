@@ -19,13 +19,17 @@ namespace actors_framework::base {
 
     cooperative_actor::cooperative_actor(supervisor_abstract* supervisor, std::string type)
         : cooperative_actor_base(supervisor, std::move(type)) {
+        ZoneScoped;
         flags_(state::empty);
         mailbox_().try_unblock();
     }
 
-    cooperative_actor::~cooperative_actor() {}
+    cooperative_actor::~cooperative_actor() {
+        ZoneScoped;
+    }
 
     auto cooperative_actor::run(executor::execution_device* e, size_t max_throughput) -> executor::executable_result {
+        ZoneScoped;
         if (!activate_(e)) {
             return executor::executable_result::done;
         }
@@ -37,35 +41,37 @@ namespace actors_framework::base {
         while (handled_msgs < max_throughput && !mailbox_().cache().empty()) {
             do {
                 ptr = next_message_();
-                if (!ptr) {
-                    if (mailbox_().try_block()) {
-                        return executor::executable_result::awaiting;
-                    }
+                if (ptr) {
+                    continue; //exit from do-while, found cached msg
+                }
+                if (mailbox_().try_block()) {
+                    return executor::executable_result::awaiting;
                 }
             } while (!ptr);
-            consume_from_cache_();
+            consume_from_cache_(); //execute
             ++handled_msgs;
         }
 
         while (handled_msgs < max_throughput) {
             do {
                 ptr = next_message_();
-                if (!ptr) {
-                    if (mailbox_().try_block()) {
-                        return executor::executable_result::awaiting;
-                    }
+                if (ptr) {
+                    continue; //exit from do-while, found new msg
+                }
+                if (mailbox_().try_block()) {
+                    return executor::executable_result::awaiting;
                 }
             } while (!ptr);
-            reactivate_(*ptr);
+            reactivate_(*ptr); //execute
             ++handled_msgs;
         }
 
         while (!ptr) {
             ptr = next_message_();
-            push_to_cache_(std::move(ptr));
+            push_to_cache_(std::move(ptr)); //save msgs to cache
         }
 
-        if (!has_next_message_() && mailbox_().try_block()) {
+        if (!has_next_message_() && mailbox_().try_block()) { //no more msgs
             return executor::executable_result::awaiting;
         }
 
@@ -73,36 +79,45 @@ namespace actors_framework::base {
     }
 
     void cooperative_actor::enqueue_base(message_ptr msg, executor::execution_device* e) {
-        assert(msg);
+        ZoneScoped;
+        if (!msg) {
+            return;
+        }
         mailbox_().enqueue(msg.release());
-        if (flags_() == state::empty) {
-            intrusive_ptr_add_ref(this);
-            if (e != nullptr) {
-                context_(e);
-                context_()->execute(this);
-            } else {
-                supervisor_()->executor()->execute(this);
-            }
+        if (flags_() != state::empty) {
+            return;
+        }
+
+        intrusive_ptr_add_ref(this); //sets as busy
+        if (e != nullptr) {
+            context_(e);
+            context_()->execute(this);
+        } else {
+            supervisor_()->executor()->execute(this);
         }
     }
 
     void cooperative_actor::intrusive_ptr_add_ref_impl() {
+        ZoneScoped;
         flags_(state::busy);
         mailbox_().try_block();
         ref();
     }
 
     void cooperative_actor::intrusive_ptr_release_impl() {
+        ZoneScoped;
         flags_(state::empty);
         mailbox_().try_unblock();
         deref();
     }
 
     auto cooperative_actor::reactivate_(message& x) -> void {
+        ZoneScoped;
         consume_(x);
     }
 
     auto cooperative_actor::next_message_() -> message_ptr {
+        ZoneScoped;
         auto& cache = mailbox_().cache();
         auto i = cache.begin();
         auto e = cache.separator();
@@ -124,12 +139,14 @@ namespace actors_framework::base {
     }
 
     auto cooperative_actor::has_next_message_() -> bool {
+        ZoneScoped;
         auto& mbox = mailbox_();
         auto& cache = mbox.cache();
         return cache.begin() != cache.separator() || mbox.can_fetch_more();
     }
 
     void cooperative_actor::push_to_cache_(message_ptr ptr) {
+        ZoneScoped;
         assert(ptr != nullptr);
         if (!ptr->is_high_priority()) {
             mailbox_().cache().insert(mailbox_().cache().end(), ptr.release());
@@ -144,11 +161,13 @@ namespace actors_framework::base {
     }
 
     void cooperative_actor::consume_(message& x) {
+        ZoneScoped;
         current_message_m_ = &x;
         execute();
     }
 
     bool cooperative_actor::consume_from_cache_() {
+        ZoneScoped;
         auto& cache = mailbox_().cache();
         auto i = cache.continuation();
         auto e = cache.end();

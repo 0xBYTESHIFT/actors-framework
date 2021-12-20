@@ -13,12 +13,16 @@ namespace actors_framework::base {
 
     cooperative_actor::cooperative_actor(supervisor_abstract* supervisor, std::string type)
         : cooperative_actor_base(supervisor, std::move(type)) {
+        ZoneScoped;
         flags_(state::empty);
     }
 
-    cooperative_actor::~cooperative_actor() {}
+    cooperative_actor::~cooperative_actor() {
+        ZoneScoped;
+    }
 
     auto cooperative_actor::run(executor::execution_device* e, size_t max_throughput) -> executor::executable_result {
+        ZoneScoped;
         if (!activate_(e)) {
             return executor::executable_result::done;
         }
@@ -40,6 +44,7 @@ namespace actors_framework::base {
     }
 
     void cooperative_actor::enqueue_base(message_ptr msg, executor::execution_device* e) {
+        ZoneScoped;
         assert(msg);
         mailbox_().enqueue(std::move(msg));
         if (flags_() == state::empty) {
@@ -64,10 +69,12 @@ namespace actors_framework::base {
     }
 
     auto cooperative_actor::reactivate_(message_ptr& x) -> void {
+        ZoneScoped;
         consume_(x);
     }
 
     auto cooperative_actor::next_message_() -> message_ptr {
+        ZoneScoped;
         message_ptr ptr;
         bool status = mailbox_().try_dequeue(ptr);
         if (!status) {
@@ -77,10 +84,12 @@ namespace actors_framework::base {
     }
 
     auto cooperative_actor::has_next_message_() -> bool {
+        ZoneScoped;
         return mailbox_().size_approx() > 0;
     }
 
     void cooperative_actor::consume_(message_ptr& x) {
+        ZoneScoped;
         current_message_m_ = std::move(x);
         execute();
     }

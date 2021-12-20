@@ -5,7 +5,7 @@ COMPILER_CXX=$3
 COMPILER_C=$4
 CMAKE_CXX_STANDARD=$5
 workspace=$6
-BUILD_TYPE=Debug
+BUILD_TYPE=Release
 rm -rf ${workspace}/build
 conan profile new default --detect
 conan profile update settings.compiler=${COMPILER} default
@@ -22,8 +22,9 @@ cmake -DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD} \
     -DALLOW_EXAMPLES=ON \
     -DALLOW_TESTS=ON \
     -DUSE_SIMPLE_QUEUE=OFF \
-    -DUSE_MOODYCAMEL_LOCKFREE_QUEUE=ON \
-    -DUSE_CAF_LOCKFREE_QUEUE=OFF \
+    -DUSE_MOODYCAMEL_LOCKFREE_QUEUE=OFF \
+    -DUSE_CAF_LOCKFREE_QUEUE=ON \
+    -DUSE_TRACY_PROFILER=ON \
     ..
 cmake --build . --parallel
 
