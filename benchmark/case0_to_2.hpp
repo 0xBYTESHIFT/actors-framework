@@ -13,10 +13,10 @@ void case0_to_2(size_t actors0_count, size_t actors1_count, size_t count, size_t
 
     af::supervisor supervisor0(new supervisor_lite("supervisor0", workers, max_queue));
     for (size_t i = 0; i < actors0_count; i++) {
-        af::send(supervisor0, af::address_t::empty_address(), "create_actor0", (size_t) i);
+        af::send(supervisor0, af::address_t::empty_address(), "create_actor0", i);
     }
     for (size_t i = 0; i < actors1_count; i++) {
-        af::send(supervisor0, af::address_t::empty_address(), "create_actor1", (size_t) i);
+        af::send(supervisor0, af::address_t::empty_address(), "create_actor1", i);
     }
     std::this_thread::sleep_for(100ms); //wait for linking to happen
 
@@ -38,10 +38,10 @@ void case0_to_2(size_t actors0_count, size_t actors1_count, size_t count, size_t
     }
 
     while (true) {
-        const int slite = actor1::count_stack_lite.load(std::memory_order_acquire);
-        const int sheavy = actor1::count_stack_heavy.load(std::memory_order_acquire);
-        const int hlite = actor1::count_heap_lite.load(std::memory_order_acquire);
-        const int hheavy = actor1::count_heap_heavy.load(std::memory_order_acquire);
+        const auto slite = actor1::count_stack_lite.load(std::memory_order_acquire);
+        const auto sheavy = actor1::count_stack_heavy.load(std::memory_order_acquire);
+        const auto hlite = actor1::count_heap_lite.load(std::memory_order_acquire);
+        const auto hheavy = actor1::count_heap_heavy.load(std::memory_order_acquire);
         utils::print_counts();
 
         if (slite == count and

@@ -73,10 +73,10 @@ namespace names {
 
 class actor1 final : public af::basic_async_actor {
 public:
-    static inline std::atomic_int count_stack_lite = 0;
-    static inline std::atomic_int count_stack_heavy = 0;
-    static inline std::atomic_int count_heap_lite = 0;
-    static inline std::atomic_int count_heap_heavy = 0;
+    static inline std::atomic<size_t> count_stack_lite = 0;
+    static inline std::atomic<size_t> count_stack_heavy = 0;
+    static inline std::atomic<size_t> count_heap_lite = 0;
+    static inline std::atomic<size_t> count_heap_heavy = 0;
     static inline double time_ns_stack_lite = 0;
     static inline double time_ns_stack_heavy = 0;
     static inline double time_ns_heap_lite = 0;
@@ -96,7 +96,7 @@ public:
         add_handler(names::actor1::callback_heap_heavy_name, &actor1::callback_heap_heavy);
     }
 
-    auto spawn_broadcast(af::address_t sender, af::address_t addr) -> void {
+    auto spawn_broadcast([[maybe_unused]] af::address_t sender, [[maybe_unused]] af::address_t addr) -> void {
         ZoneScoped;
         //nop
     }
@@ -107,7 +107,7 @@ public:
         count_stack_lite.fetch_add(1, std::memory_order_release);
         auto now = std::chrono::steady_clock::now();
         auto diff = std::chrono::duration_cast<std::chrono::nanoseconds>(now - task.created);
-        time_ns_stack_lite += diff.count();
+        time_ns_stack_lite += static_cast<double>(diff.count());
         time_ns_stack_lite /= 2.0;
     }
     auto callback_stack_heavy(task_stack_heavy& task_) -> void {
@@ -116,7 +116,7 @@ public:
         count_stack_heavy.fetch_add(1, std::memory_order_release);
         auto now = std::chrono::steady_clock::now();
         auto diff = std::chrono::duration_cast<std::chrono::nanoseconds>(now - task.created);
-        time_ns_stack_heavy += diff.count();
+        time_ns_stack_heavy += static_cast<double>(diff.count());
         time_ns_stack_heavy /= 2;
     }
     auto callback_heap_lite(task_heap_lite& task_) -> void {
@@ -125,7 +125,7 @@ public:
         count_heap_lite.fetch_add(1, std::memory_order_release);
         auto now = std::chrono::steady_clock::now();
         auto diff = std::chrono::duration_cast<std::chrono::nanoseconds>(now - task.created);
-        time_ns_heap_lite += diff.count();
+        time_ns_heap_lite += static_cast<double>(diff.count());
         time_ns_heap_lite /= 2;
     }
     auto callback_heap_heavy(task_heap_heavy& task_) -> void {
@@ -134,7 +134,7 @@ public:
         count_heap_heavy.fetch_add(1, std::memory_order_release);
         auto now = std::chrono::steady_clock::now();
         auto diff = std::chrono::duration_cast<std::chrono::nanoseconds>(now - task.created);
-        time_ns_heap_heavy += diff.count();
+        time_ns_heap_heavy += static_cast<double>(diff.count());
         time_ns_heap_heavy /= 2;
     }
 };
@@ -161,7 +161,7 @@ public:
         add_handler(names::actor0::send_heap_heavy_name, &actor0::send_heap_heavy);
     }
 
-    auto spawn_broadcast(af::address_t sender, af::address_t addr) -> void {
+    auto spawn_broadcast([[maybe_unused]] af::address_t sender, af::address_t addr) -> void {
         ZoneScoped;
         std::string type_str = addr.type();
         type_str.erase(type_str.size() - 1); //delete last letter (id)
@@ -268,7 +268,7 @@ public:
         actors_.emplace_back(std::move(t));
     }
 
-    auto add_supervisor_impl(af::supervisor t) -> void final {
+    auto add_supervisor_impl([[maybe_unused]] af::supervisor t) -> void final {
         ZoneScoped;
     }
 
