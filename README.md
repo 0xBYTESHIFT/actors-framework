@@ -95,3 +95,8 @@ public:
 ## Dependencies
 
 * CMake >= 3.0
+
+## Credits
+
+* https://github.com/actor-framework/actor-framework - original idea & implementation, CAF lockfree queue (deprecated), etc.
+* https://github.com/duckstax/actor-zeta - class wrappers, type checking, some tests (current library hardforked from it)
